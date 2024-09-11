@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 목록</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+
+        /* 기본 모드 (라이트 모드) */
+      body {
+          background-color: white; /* 기본 배경색 */
+          color: black; /* 기본 글자색 */
+
+      }
+ .banner {
+
+  width: 98%;
+  height: 250px; /* 배너의 높이 */
+   position: relative; /* 배너를 기준으로 절대 위치를 지정할 수 있게 설정 */
+  background-image: url('img/1234.png'), url('img/1234.png'), url('img/cute.png'); /* 잔디 이미지를 두 번 사용하고, 강아지 이미지 추가 */
+  background-size: 50% 127%, 50% 130%, contain; /* 잔디 이미지를 각각 절반씩 차지하게 조정, 강아지 이미지는 비율 유지 */
+  background-position: left bottom, right bottom, right -10px; /* 잔디 이미지는 좌우 하단, 강아지 이미지는 오른쪽 중앙에 배치 */
+  background-repeat: no-repeat, no-repeat, no-repeat; /* 배경 이미지가 반복되지 않도록 설정 */
+  margin-bottom: 40px; /* 배너와 상품 목록 사이의 여백 */
+  margin-top: 90px; /* 상단 여백 조정 */
+  border-radius:23px; /* 배너의 모서리를 둥글게 */
+      z-index: 10; /* 배너가 다른 콘텐츠 위에 표시되도록 설정 */
+
+  }
+
+
+
+      /* 전체 카드 디자인 */
+          .card {
+            left: 1%;
+              position: relative; /* 카드의 위치를 상대적으로 설정하여 내부 요소들이 절대적으로 배치될 수 있도록 함 */
+              border: none; /* 카드의 테두리를 없앰 */
+               background-color: rgba(255, 255, 255, 0); /* 완전 투명 흰색 */
+               height: 475px; /* 이미지 높이를 400px로 설정 */
+              width: 280px; /* 이미지 너비를 400px로 설정 */
+              overflow: hidden; /* 카드의 내용이 넘칠 경우 숨김 */
+              border-radius: 10px; /* 모든 모서리를 둥글게 설정 */
+              text-decoration: none !important;
+
+              transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* 카드의 변환과 그림자 효과에 대한 트랜지션을 설정 */
+          }
+
+          .card:hover {
+              transform: scale(1.03); /* 마우스 오버 시 카드가 커지도록 설정 */
+              box-shadow: 0 8px 16px rgba(0, 0, 0, 0.0); /* 마우스 오버 시 카드의 그림자 효과를 더 진하게 설정 */
+              border-radius: 0 0 0 0; /* 모든 모서리를 각지게 */
+          }
+
+          /* 이미지 설정 */
+          .card img {
+              height: 300px; /* 이미지 높이를 400px로 설정 */
+              width: 300px; /* 이미지 너비를 400px로 설정 */
+              object-fit: cover; /* 이미지를 잘라서 컨테이너에 맞게 채움 */
+              transition: transform 0.3s ease-in-out; /* 이미지의 변환 효과에 대한 트랜지션을 설정 */
+              border-radius: 10px; /* 카드의 모서리를 둥글게 설정 */
+
+          }
+
+          .card:hover img {
+              transform: scale(1.1); /* 마우스 오버 시 이미지가 커지도록 설정 */
+              border-radius: 10px; /* 카드의 모서리를 둥글게 설정 */
+          }
+
+          /* 카드 본문 설정 */
+          .card-body {
+          position: relative; /* 카드 본문의 위치를 상대적으로 설정 */
+          top: 0%;
+          width: 100%; /* 본문이 컨테이너의 전체 너비를 가지도록 설정 */
+          padding: 20px; /* 카드 본문의 내부 여백을 설정 */
+          width: 200px;
+          height: 200px;
+          justify-content: center; /* 가로 중앙 정렬 */
+          align-items: center; /* 세로 중앙 정렬 */
+          text-decoration: none !important;
+          background-color: rgba(255, 255, 255, 0); /* 완전 투명 흰색 */
+           }
+      .card-title {
+      max-width: 100%; /* 최대 너비를 부모 요소에 맞춤 */
+      font-size: 17px; /* 글꼴 크기 설정 */
+      color: #333333; /* 글꼴 색상 설정 */
+      font-family: 'EB Garamond', 'Noto Serif KR', 'Noto Sans KR', 'Malgun Gothic', dotum, sans-serif; /* 글꼴 설정 */
+      font-weight: 500; /* 글꼴 두께 설정 */
+      text-overflow: ellipsis; /* 넘치는 내용에 생략 표시 (...)를 추가 */
+      white-space: nowrap; /* 한 줄로 텍스트 표시 */
+      line-height: 100px; /* 줄 간격 설정 */
+      vertical-align: middle; /* 세로 가운데 정렬 */
+      text-align: center; /* 가운데 정렬 */
+      margin-bottom: 5px; /* 아래 여백을 줄임 */
+      background-color: rgba(255, 255, 255, 0); /* 완전 투명 흰색 */
+
+       }
+
+       .card-price {
+        position: absolute; /* 카드 본문 내에서 절대 위치 지정 */
+      bottom: 16px; /* 카드 본문 하단에서 20px 위치 */
+      width: 100%; /* 본문 너비에 맞춤 */
+      text-align: left ; /* 가운데 정렬 */
+      padding-left: 20px; /* 왼쪽에 20px 여백 추가 */
+      color: #c9ab81 !important;
+      font-size: 20px;
+      font-family: 'Noto Serif KR', 'EB Garamond', 'Noto Sans KR', 'Malgun Gothic', dotum, sans-serif;
+      font-weight: 500;
+
+       }
+
+
+
+
+  /* 라이트 모드 버튼 스타일 */
+  [data-theme="light"] #theme-toggle {
+  background-color:  rgba(255, 255, 255, 0);
+  color: #F4A261;
+  //border-color: #a5d6a7;
+  }
+
+  /* 다크 모드 버튼 스타일 */
+  [data-theme="dark"] #theme-toggle {
+  background-color:  rgba(255, 255, 255, 0);
+  color: #FFFFF0; /* 글씨색을 하얀색으로 */
+  }
+
+
+
+
+  .row {
+      margin: 0; /* 마진 초기화 */
+  }
+
+  .col {
+      margin-bottom: 1rem; /* 카드 사이에 공간 추가 */
+  }
+
+
+       a {
+         text-decoration: none;
+         }
+  /* 다크 모드 */
+      [data-theme="dark"] {
+          background-color: #121212; /* 기본 배경색 */
+          color: white; /* 기본 글자색 */
+      }
+
+      [data-theme="dark"] .card {
+       background-color: rgba(255, 255, 255, 0); /* 완전 투명 흰색 */
+          color: #e0e0e0; /* 카드 텍스트 색상 */
+      }
+
+      [data-theme="dark"] .card img {
+          border-radius: 10px; /* 이미지 모서리 둥글게 */
+      }
+
+      [data-theme="dark"] .card-body {
+          background-color: rgba(255, 255, 255, 0); /* 완전 투명 흰색 */
+      }
+
+      [data-theme="dark"] .card-title {
+          color: #e0e0e0; /* 카드 제목 색상 */
+      }
+
+      [data-theme="dark"] .card-price {
+          color: #d4a1a1; /* 카드 가격 색상 */
+      }
+       [data-theme="dark"] #searchInput  {
+          color: white; /* 카드 가격 색상 */
+      }
+
+  /* 다크 모드에서 헤더의 배경색과 글씨색 변경 */
+  [data-theme="dark"] .header {
+  background-color: #121212; /* 헤더 배경색을 다크 모드에 맞게 변경 */
+  color: white; /* 헤더 글씨색을 흰색으로 변경 */
+  }
+
+  /* 헤더에 마우스를 올렸을 때 글씨색을 초록색으로 변경 */
+  [data-theme="dark"] .header:hover {
+  color: #a5d6a7; /* 초록색으로 변경 */
+  transition: color 0.3s ease; /* 색상 전환 효과 */
+  }
+
+      /* 기타 스타일 조정 */
+      [data-theme="dark"] a {
+          color: white; /* 링크 색상 */
+      }
+
+  /* 다크 모드와 라이트 모드의 전환 애니메이션 설정 */
+  body, .card, .header {
+      transition: background-color 0.5s ease, color 0.5s ease;
+  }
+      /* 버튼을 오른쪽 끝에 위치시키기 */
+  #theme-toggle {
+      width: 60px;  /* 버튼 너비를 더 크게 설정 */
+      height: 60px; /* 버튼 높이를 더 크게 설정 */
+      position: absolute;
+      right: 380px;
+      top: 130px;
+      background-color: transparent;
+      color: #000000;
+      border: none;
+      display: flex;
+      justify-content: center;  /* 수평 중앙 정렬 */
+      align-items: center;      /* 수직 중앙 정렬 */
+      cursor: pointer;
+     transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease; /* 애니메이션 효과 통합 */
+      padding: 0; /* 내부 여백을 0으로 설정 */
+      box-sizing: border-box; /* 패딩을 포함하여 전체 크기를 조정 */
+      z-index: 20; /* 클릭 가능한 영역을 보장 */
+       font-size: 18px; /* 아이콘과 문구의 폰트 크기 조정 */
+  }
+  #theme-toggle:hover {
+      transform: scale(1.1); /* 아이콘 확대 */
+     opacity: 0.7; /* 아이콘 투명도 조절 */
+
+     }
+ #theme-icon {
+    font-size: 48px;   /* 아이콘 크기 조정 */
+    cursor: pointer;   /* 아이콘에 마우스를 올리면 클릭 가능한 상태로 설정 */
+}
+  /* 문구의 초기 상태 */
+  #theme-message {
+      position: absolute;
+      top: -36%;
+      left: -108%;
+      transform: translateX(-50%);
+      opacity: 0;
+      color: #6c757d;
+      font-size: 12px;
+      white-space: nowrap;
+      transition: opacity 0.3s ease;
+  }
+
+  /* 문구 애니메이션을 위한 스타일 */
+  @keyframes slide-up {
+      0% {
+          opacity: 0;
+          transform: translateY(20px);
+      }
+      50% {
+          opacity: 1;
+          transform: translateY(-10px);
+      }
+      100% {
+          opacity: 0;
+          transform: translateY(20px);
+      }
+  }
+
+  /* 문구 애니메이션 적용 */
+  .show-message #theme-message {
+      animation: slide-up 7s forwards;
+  }
+
+  .star-icon {
+      position: absolute; /* 절대 위치 지정 */
+      //font-size: 14px; /* 기본 아이콘 크기 */
+      opacity: 0; /* 기본적으로 보이지 않게 설정 */
+      transition: opacity 0.4s ease; /* 부드러운 투명도 변화 */
+  }
+
+  /* 별 아이콘의 개별 스타일 */
+  .star-1 {
+      top: 3%; /* 위치 조정 */
+      left: 73%; /* 위치 조정 */
+      font-size: 10px; /* 크기 조정 */
+      animation: sparkle-1 3s infinite; /* 반짝이는 애니메이션 적용 */
+  }
+
+  .star-2 {
+      top: 0%; /* 위치 조정 */
+      left: 50%; /* 위치 조정 */
+      font-size: 9px; /* 크기 조정 */
+      animation: sparkle-2 5s infinite; /* 반짝이는 애니메이션 적용 */
+  }
+
+  .star-3 {
+      top: 9%; /* 위치 조정 */
+      left: 40%; /* 위치 조정 */
+      font-size: 10px; /* 크기 조정 */
+      animation: sparkle-3 4s infinite; /* 반짝이는 애니메이션 적용 */
+  }
+
+  .star-4 {
+      top: -20%; /* 위치 조정 */
+      left: 25%; /* 위치 조정 */
+      font-size: 11px; /* 크기 조정 */
+      animation: sparkle-4 6s infinite; /* 반짝이는 애니메이션 적용 */
+  }
+
+  .star-5 {
+      top: 10%; /* 위치 조정 */
+      left: 60%; /* 위치 조정 */
+      font-size: 13px; /* 크기 조정 */
+      animation: sparkle-5 7s infinite; /* 반짝이는 애니메이션 적용 */
+  }
+  .star-6 {
+      top: -20%; /* 위치 조정 */
+      left: 85%; /* 위치 조정 */
+      font-size: 10px; /* 크기 조정 */
+      animation: sparkle-5 7s infinite; /* 반짝이는 애니메이션 적용 */
+  }
+  .star-7 {
+      top: 10%; /* 위치 조정 */
+      left: 10%; /* 위치 조정 */
+      font-size: 10px; /* 크기 조정 */
+      animation: sparkle-5 7s infinite; /* 반짝이는 애니메이션 적용 */
+  }
+
+  /* 다크 모드에서 별 아이콘의 스타일 */
+  [data-theme="dark"] .star-icon {
+      opacity: 1; /* 다크 모드에서 보이게 설정 */
+  }
+
+  /* 반짝이는 애니메이션 개별 설정 */
+  @keyframes sparkle-1 {
+      0%, 100% {
+          color: #ffffff; /* 하얀색 */
+      }
+      50% {
+          color: rgba(255, 255, 255, 0); /* 투명색 */
+      }
+  }
+
+  @keyframes sparkle-2 {
+      0%, 100% {
+          color: #ffffff; /* 하얀색 */
+      }
+      50% {
+          color: rgba(255, 255, 255, 0); /* 투명색 */
+      }
+  }
+
+  @keyframes sparkle-3 {
+      0%, 100% {
+          color: #ffffff; /* 하얀색 */
+      }
+      50% {
+          color: rgba(255, 255, 255, 0); /* 투명색 */
+      }
+  }
+
+  @keyframes sparkle-4 {
+      0%, 100% {
+          color: #ffffff; /* 하얀색 */
+      }
+      50% {
+          color: rgba(255, 255, 255, 0); /* 투명색 */
+      }
+  }
+
+  @keyframes sparkle-5 {
+      0%, 100% {
+          color: #ffffff; /* 하얀색 */
+      }
+      50% {
+          color: rgba(255, 255, 255, 0); /* 투명색 */
+      }
+  }
+
+
+      /* 나비 공통 스타일 */
+      .butterfly {
+          position: absolute;
+          width: 100px;
+          height: 100px;
+
+          background-size: cover;
+          background-position: center;
+          z-index: 5;
+      }
+
+      /* 왼쪽에 배치할 나비 */
+      .butterfly-left {
+          bottom: -20%; /* 화면 안쪽으로 조정 */
+          left: 15%; /* 화면 왼쪽으로 조정 */
+            background-image: url('img/birds.png');
+          animation: fly-left 10s linear infinite; /* 애니메이션 적용 */
+          //  animation: fly-left 10s cubic-bezier(0.42, 0, 0.58, 1) infinite; /* 부드럽고 자연스러운 움직임 */
+      }
+
+      /* 오른쪽에 배치할 나비 */
+      .butterfly-right {
+         position: absolute;
+          top: 20%; /* 화면 안쪽으로 조정 */
+          left: 40%; /* 화면 오른쪽으로 조정 */
+           background-image: url('img/birds.png');
+          animation: fly-right 10s linear infinite; /* 애니메이션 적용 */
+      }
+
+      /* 왼쪽 나비의 애니메이션 */
+      @keyframes fly-left {
+          0% {
+              transform: translate(0, 0)  rotate(0deg) scale(1);
+          }
+          25% {
+              transform: translate(-50px, -50px); rotate(-15deg) scale(1.2);
+          }
+          50% {
+              transform: translate(-100px, 50px) rotate(10deg) scale(1);
+          }
+          75% {
+              transform: translate(-50px, 150px) rotate(-15deg) scale(1.1);
+          }
+          100% {
+              transform: translate(0, 0) rotate(0deg) scale(1);
+          }
+      }
+
+  /* 오른쪽 나비의 애니메이션 */
+  @keyframes fly-right {
+  0% {
+      transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  25% {
+      transform: translate(150px, -50px) rotate(-15deg) scale(1.2);
+  }
+  50% {
+      transform: translate(300px, 50px) rotate(10deg) scale(1);
+  }
+  75% {
+      transform: translate(200px, 30px) rotate(-10deg) scale(1.1);
+  }
+  100% {
+      transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  }
+          /* 상단으로 이동 버튼 스타일 */
+  #scroll-top {
+    position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-image: url('img/ball.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: none;
+      border-radius: 50%; /* 버튼을 둥글게 설정 */
+      width: 80px; /* 버튼 너비 설정 */
+      height: 80px; /* 버튼 높이 설정 */
+      display: flex; /* 플렉스 박스 설정 */
+      justify-content: center; /* 가로 중앙 정렬 */
+      align-items: center; /* 세로 중앙 정렬 */
+      cursor: pointer; /* 마우스 포인터를 손 모양으로 설정 */
+      opacity: 0.7; /* 버튼의 투명도를 설정 */
+      transition: opacity 0.3s; /* 투명도 변화에 대한 트랜지션 설정 */
+       background-color: transparent; /* 배경색을 투명으로 설정 */
+  }
+
+
+        #scroll-top:hover {
+            opacity: 1; /* 마우스 오버 시 투명도를 1로 설정 */
+        }
+
+        #scroll-top::before {
+           content: '↑';
+          font-size: 24px;
+       //  color:  #a5d6a7;
+         position: absolute; /* 절대 위치 지정 */
+         top:70%; /* 버튼의 중앙에서 */
+         transform: translateY(-50%); /* 중앙으로 정렬 */
+        }
+
+
+.hand-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 10px; /* 아이콘과 텍스트 사이의 간격 조정 */
+    position: absolute;
+    top: 10px;
+    right: -20px; /* 위치 조정으로 아이콘이 잘 눌리도록 조정 */
+    animation: hand-pulse 1s infinite;
+    pointer-events: none; /* 손 아이콘은 클릭되지 않도록 설정 */
+}
+          /* 손 아이콘 애니메이션 */
+  @keyframes hand-pulse {
+      0% {
+          transform: scale(1); /* 초기 크기 */
+      }
+      50% {
+          transform: scale(1.2); /* 커진 크기 */
+      }
+      100% {
+          transform: scale(1); /* 원래 크기 */
+      }
+  }
+
+        .sort-buttons {
+            display: flex;
+            justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+
+            margin-bottom: 1rem; /* 버튼 하단에 여백 추가 */
+             margin-top: -50px;
+
+        }
+        .sort-button {
+            font-family: var(--main-font);
+            font-size: 14px;
+            line-height: 36px;
+            color: var(--gray02);
+            background: var(--white);
+            width: 150px; /* 버튼 크기 조정 가능 */
+            height: 36px;
+            padding: 0 15px;
+            border: 1px solid var(--lightGray01);
+            border-radius: 3px;
+            box-sizing: border-box;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+
+        }
+        .sort-button:hover {
+            background: var(--lightGray02);
+            border-color: var(--gray02);
+        }
+        .sort-button i {
+            margin-left: 0.5rem; /* 아이콘과 텍스트 사이에 여백 추가 */
+        }
+
+
+ .search-container {
+            display: flex;
+            align-items: center;
+             margin-left: 400px; /* 오른쪽으로 이동 */
+             margin-top: -60px;
+
+        }
+
+        #searchInput {
+            border: none;
+            border-bottom: 2px solid  #c9ab81;
+            padding: 10px;
+            font-size: 16px;
+            outline: none;
+            background: transparent;
+            border-radius: 0;
+            transition: border-color 0.3s ease;
+              min-width: 500px; /* 최소 너비 설정 */
+               color: #000; /* 기본 라이트 모드 텍스트 색상 */
+               spellcheck: false; /* 맞춤법 검사 비활성화 */
+                 margin-right: 10px; /* 검색창과 버튼 간의 간격 조정 */
+        }
+
+        #searchInput:focus {
+            border-bottom-color: #a5d6a7;
+        }
+
+        #searchButton {
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 10px;
+            color:  #c9ab81;
+            transition: color 0.3s ease;
+        }
+
+        #searchButton:hover {
+            color: #a5d6a7;
+        }
+/* 기본 모드에서 placeholder 색상 */
+input::placeholder {
+    color: #666; /* 기본 텍스트 색상 (예: 어두운 회색) */
+}
+
+/* 다크 모드 스타일 */
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background-color: #121212; /* 다크 모드 배경색 */
+    }
+
+    .search-container {
+        background-color: #1e1e1e; /* 다크 모드 배경색 */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    #searchInput {
+        border-bottom: 2px solid #4a90e2;
+        color: white; /* 다크 모드 텍스트 색상 */
+    }
+
+    #searchInput::placeholder {
+        color: #fff !important; /* 다크 모드일 때 화이트 색상 */
+    }
+
+    #searchInput:focus {
+        border-bottom-color: #3a7bd5;
+    }
+
+    #searchButton {
+        color: #4a90e2;
+    }
+
+    #searchButton:hover {
+        color: #3a7bd5;
+    }
+}
+
+.form-select {
+    margin-top: 29px;
+    padding: 8px 12px;
+    border: none; /* 기본 테두리 제거 */
+    border-bottom: 1px solid #c9ab81; /* 밑줄 테두리 추가 */
+    border-radius: 0; /* 모서리 둥글기 제거 */
+    /* 투명도가 0.5인 하얀색 배경 */
+    background-color: rgba(255, 255, 255, 0);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    font-size: 14px; /* 폰트 크기 */
+    width: 200px;
+     outline: none; /* 기본 포커스 윤곽선 제거 */
+        color: #808080; /* 기본 글씨 색상 */
+}
+
+.form-select:hover,
+.form-select:focus {
+ box-shadow: none; /* 포커스 시 그림자 제거 */
+    border-bottom: 1px solid #c9ab81; /* 밑줄 테두리 색상 변경 */
+    outline: none; /* 포커스 시 기본 윤곽선 제거 */
+    transform: scale(1.01); /* 약간 확대되는 애니메이션 효과 */
+}
+/* 옵션 스타일 */
+.form-select option {
+    padding: 0.5rem;
+   outline: none; /* 포커스 시 기본 윤곽선 제거 */
+    background-color: rgba(255, 255, 255, 0);
+    color: #c9ab81; /* 기본 텍스트 색상 */
+    border: none; /* 기본 테두리 제거 */
+}
+
+/* 옵션에 마우스 오버 시 스타일 */
+.form-select option:hover {
+    background-color: white; /* 마우스 오버 시 배경색 */
+    color: #c9ab81; /* 마우스 오버 시 텍스트 색상 */
+}
+
+/* 다크 모드 스타일 */
+@media (prefers-color-scheme: dark) {
+    .form-select {
+        color: white; /* 드롭다운 메뉴의 텍스트 색상을 하얀색으로 설정 */
+        background-color: #333; /* 배경색을 어두운 색으로 설정 */
+        border-bottom: 1px solid #555; /* 밑줄 테두리 색상 조정 */
+    }
+
+    .form-select option {
+        color: white; /* 기본 옵션의 글씨 색상은 어두운 색으로 설정 */
+        background-color:black; /* 기본 옵션 배경색은 어두운 색으로 설정 */
+    }
+
+    .form-select option:checked {
+        color: #fff; /* 선택된 옵션의 글씨 색상을 하얀색으로 설정 */
+        background-color: #555; /* 선택된 옵션의 배경색을 어두운 색으로 설정 */
+    }
+}
+
+
+        .mb-3 {
+            display: flex;
+    align-items: center;
+    gap: 10px; /* 레이블과 드롭다운 간의 간격 */
+
+        }
+
+    </style>
+</head>
+<body>
+<!-- 헤더 부분은 이곳에 삽입 -->
+<div th:replace="~{fragments/header::header}" class="header"></div>
+
+<div class="container mt-2">
+
+    <div class="theme-toggle-container">
+        <!-- 다크 모드 토글 버튼 -->
+        <button id="theme-toggle" class="btn btn-secondary">
+            <i id="theme-icon" class="fas fa-sun"></i>
+            <img id="hand-icon" src="img/hand.png" alt="Hand Icon" class="hand-icon">
+            <div id="theme-message">밤 산책을 원하시면 해를 눌러주세요</div>
+        </button>
+    </div>
+
+    <div class="banner">
+        <div class="grass"></div>
+        <div class="dog"></div>
+
+        <i class="star-icon fas fa-star star-1"></i>
+        <i class="star-icon fas fa-star star-2"></i>
+        <i class="star-icon fas fa-star star-3"></i>
+        <i class="star-icon fas fa-star star-4"></i>
+        <i class="star-icon fas fa-star star-5"></i>
+        <i class="star-icon fas fa-star star-6"></i>
+        <i class="star-icon fas fa-star star-7"></i>
+    </div>
+    <!-- 카테고리 선택 요소 -->
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- 필터, 정렬 버튼, 검색창을 포함할 컨테이너 -->
+                <div class="filter-container">
+                    <!-- 카테고리 필터 -->
+                    <div class="mb-3" >
+                        <label for="categoryFilter" class="fas fa-paw" style="margin-top: 35px; font-size: 25px; color:  #c9ab81;  margin-right: 20px;"></label>
+                        <select id="categoryFilter" class="form-select" >
+                                <option value="">모든 카테고리</option>
+                            <option value="사료">사료</option>
+                            <option value="간식">간식</option>
+                            <option value="장난감">장난감</option>
+                            <option value="목욕용품">목욕용품</option>
+                            <option value="영양제">영양제</option>
+                        </select>
+                    </div>
+                    <!-- 정렬 버튼 -->
+                    <div class="sort-buttons">
+                        <button id="sortHighToLow" class="sort-button">
+                            가격 높은순
+                            <i class="fa-solid fa-chevron-down"></i> <!-- Font Awesome 아이콘 사용 -->
+                        </button>
+                        <button id="sortLowToHigh" class="sort-button">
+                            가격 낮은순
+                            <i class="fa-solid fa-chevron-up"></i> <!-- Font Awesome 아이콘 사용 -->
+                        </button>
+                    </div>
+
+                    <!-- 검색창 -->
+                    <div class="search-container" >
+                        <input type="text" id="searchInput" placeholder="원하시는 상품을 검색해보세요" spellcheck="false">
+                        <button id="searchButton">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!--    &lt;!&ndash; 상품 수 표시 &ndash;&gt;-->
+<!--    <div class="row">-->
+<!--        <div class="col-md-12">-->
+<!--            <p>총 <span th:text="${totalProducts}" style="color: #c9ab81 !important;"></span>건</p>-->
+<!--        </div>-->
+<!--    </div>-->
+    <div id="postList" class="row row-cols-1 row-cols-md-4 g-4"  style="margin-top: 40px;  margin: 50px -70px;">
+
+    </div>
+
+
+
+
+
+</div>
+
+<div class="butterfly butterfly-left"></div>
+
+
+<div class="butterfly butterfly-right"></div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+
+<button id="scroll-top"></button>
+<script>
+    var postScroll = true;
+
+  // 초기값으로 0~6번째 게시물만 출력받도록 설정
+  var offset = 0;
+  var limit = 12
+ var searchQuery = '';
+var selectedCategory = ''; // 카테고리 선택을 위한 변수 추가
+
+  $(document).ready(function() {
+
+
+
+      // 게시글 목록 출력
+      postListDisplay(offset, limit);
+
+
+      if (postScroll === true) {
+          // 무한스크롤 함수 실행
+          $(window).scroll(scrollHandler);
+
+
+      }
+      // 검색 버튼 클릭 시 검색 수행
+            $('#searchButton').click(function() {
+                searchQuery = $('#searchInput').val().trim();
+                offset = 0; // 검색 시 오프셋을 초기화
+                $('#postList').empty(); // 검색 결과를 위해 게시글 목록 비우기
+                postListDisplay(offset, limit);
+  });
+
+
+    // 카테고리 선택 이벤트 처리
+    $('#categoryFilter').change(function() {
+        selectedCategory = $(this).val();
+        offset = 0; // 카테고리 변경 시 오프셋을 초기화
+        $('#postList').empty(); // 선택된 카테고리에 맞는 게시글을 불러오기 위해 목록 비우기
+        postListDisplay(offset, limit);
+    });
+});
+
+
+  // 무한 스크롤 기능
+  function scrollHandler() {
+
+<!--          console.log("Scroll event detected");-->
+<!--          console.log("ScrollTop:", $(window).scrollTop());-->
+<!--          console.log("Window height:", $(window).height());-->
+<!--          console.log("Document height:", $(document).height());-->
+
+
+
+
+
+      // 스크롤이 화면 가장 아래에 닿으면 실행됨
+      if (postScroll === true && $(window).scrollTop() + $(window).height() >= $(document).height() - 30) {
+          // 초기값은 limit 값을 더한 값으로 설정
+          offset += limit;
+          // 변경된 초기값으로 다시 목록이 출력됨
+          postListDisplay(offset, limit);
+      }
+  }
+
+  //게시글 목록 출력
+  function postListDisplay(offset, limit) {
+      postScroll = true;
+
+      $.ajax({
+          method: "GET",
+          url: "/main/list",
+
+          data: {"offset": offset
+                  , "limit": limit
+                  , "searchQuery": searchQuery, // 검색어 추가
+                      "category": selectedCategory // 카테고리 필터 추가
+              },
+          dataType: "json",
+          success: function(result) {
+              console.log(result);
+              // 출력 데이터가 없다면 무한스크롤을 false(중지상태)로 설정
+              if (result.length === 0) {
+                  postScroll = false;
+              // 출력 데이터가 16이하이면 목록 출력하고 무한스크롤 false 상태로 변경
+              } else if(result.length < 6) {
+                  for (var i = 0; i < result.length; i++) {
+                      var postList = result[i];
+              var postElement2 = $("<div class='col'>" +
+"<div class='card'>" +
+  "<a href='/item/" + postList.id + "' class='text-dark'>" +
+      "<img src='" + postList.imgUrl + "' class='card-img-top' alt='" + postList.itemNm + "'>" +
+      "<div class='card-body d-flex flex-column'>" +
+          // 제목을 맨 위에 위치시킵니다.
+          "<h4 class='card-title'>" + postList.itemNm + "</h4>" +
+
+          // 가격을 맨 아래에 위치시킵니다.
+          "<h3 class='card-price text-danger mt-auto'>" + postList.price + " 원</h3>" +
+      "</div>" +
+  "</a>" +
+"</div>" +
+"</div>");
+
+                      $("#postList").append(postElement2);
+                  }
+                  postScroll = false;
+              // 데이터가 16개 초과이면 16개까지만 출력하고 무한스크롤 상태 true 로 유지됨
+              } else {
+                  for (var i = 0; i < result.length; i++) {
+                      var postList = result[i];
+              var postElement2 = $("<div class='col'>" +
+"<div class='card'>" +
+  "<a href='/item/" + postList.id + "' class='text-dark'>" +
+      "<img src='" + postList.imgUrl + "' class='card-img-top' alt='" + postList.itemNm + "'>" +
+      "<div class='card-body d-flex flex-column'>" +
+          // 제목을 맨 위에 위치시킵니다.
+          "<h4 class='card-title'>" + postList.itemNm + "</h4>" +
+
+          // 가격을 맨 아래에 위치시킵니다.
+          "<h3 class='card-price text-danger mt-auto'>" + postList.price + " 원</h3>" +
+      "</div>" +
+  "</a>" +
+"</div>" +
+"</div>");
+
+
+
+
+ postElement2.find('.card-title').text(postList.itemNm);
+               postElement2.find('.card-text').text(postList.itemDetail);
+               postElement2.find('.card-price').text(postList.price + '원');
+
+
+                      $("#postList").append(postElement2);
+
+                  }
+              }
+          },
+          error: function(error) {
+            console.log(error);
+          }
+      });
+  }
+ document.addEventListener('DOMContentLoaded', function() {
+    const theme = localStorage.getItem('theme');
+    const themeIcon = document.getElementById('theme-icon');
+    const starIcon = document.getElementById('star-icon'); // 별 아이콘 추가
+     const themeMessage = document.getElementById('theme-message');
+      const handIcon = document.getElementById('hand-icon'); // 이미지 요소 추가
+
+
+    if (theme) {
+        document.body.setAttribute('data-theme', theme);
+        themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+          themeMessage.textContent = theme === 'dark' ? '낮 산책을 원하시면 달을 눌러주세요' : '밤 산책을 원하시면 해를 눌러주세요';
+ // 이미지 경로 설정
+        handIcon.src = localStorage.getItem('handIconSrc') || (theme === 'dark' ? 'img/hand.png' : 'img/handss.png');
+    } else {
+        // 기본 이미지 설정 (테마가 없을 경우)
+        handIcon.src = 'img/handss.png'; // 라이트 모드 이미지
+    }
+
+    // 토글 버튼 클릭 이벤트
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+        let currentTheme = document.body.getAttribute('data-theme');
+
+         if (currentTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'light');
+            themeIcon.className = 'fas fa-sun';
+            themeMessage.textContent = '밤 산책을 원하시면 해를 눌러주세요';
+            handIcon.src = 'img/hand.png'; // 다크 모드 이미지
+            localStorage.setItem('theme', 'light'); // 테마 업데이트
+            localStorage.setItem('handIconSrc', 'img/hand.png'); // 이미지 경로 저장
+        } else {
+            document.body.setAttribute('data-theme', 'dark');
+            themeIcon.className = 'fas fa-moon';
+            themeMessage.textContent = '낮 산책을 원하시면 달을 눌러주세요';
+            handIcon.src = 'img/handss.png'; // 라이트 모드 이미지
+            localStorage.setItem('theme', 'dark'); // 테마 업데이트
+            localStorage.setItem('handIconSrc', 'img/handss.png'); // 이미지 경로 저장
+            }
+
+        // 아이콘 전환 애니메이션 추가
+        themeIcon.classList.add('rotate'); // 회전 애니메이션 추가
+        setTimeout(() => {
+            themeIcon.classList.remove('rotate');
+        }, 300); // 애니메이션 시간과 맞춰줌
+
+        localStorage.setItem('theme', currentTheme === 'dark' ? 'light' : 'dark');
+    });
+});
+
+    // 상단으로 이동하는 버튼 클릭 이벤트
+    document.getElementById('scroll-top').addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+    const themeMessage = document.getElementById('theme-message');
+
+    // 페이지 로드 시 문구가 올라오게 하기
+    document.body.classList.add('show-message');
+
+    // 애니메이션 종료 후 문구 숨기기
+    setTimeout(function() {
+        themeMessage.style.opacity = '0';
+    }, 70000);
+});
+
+     $(document).ready(function () {
+        // 가격 높은순 버튼 클릭 이벤트
+        $('#sortHighToLow').on('click', function () {
+            sortProducts('desc');
+        });
+
+        // 가격 낮은순 버튼 클릭 이벤트
+        $('#sortLowToHigh').on('click', function () {
+            sortProducts('asc');
+        });
+
+        // 제품 정렬 함수
+        function sortProducts(order) {
+            var $postList = $('#postList');
+            var $cards = $postList.children('.col');
+
+            $cards.sort(function (a, b) {
+                var priceA = parseFloat($(a).find('.card-price').text().replace(/[^0-9.-]+/g, ""));
+                var priceB = parseFloat($(b).find('.card-price').text().replace(/[^0-9.-]+/g, ""));
+
+                if (order === 'asc') {
+                    return priceA - priceB;
+                } else {
+                    return priceB - priceA;
+                }
+            });
+
+            $postList.append($cards);
+        }
+    });
+
+    $(document).ready(function() {
+    loadRecentViewedProducts();
+
+    function loadRecentViewedProducts() {
+        let recentViewed = JSON.parse(localStorage.getItem('recentViewed')) || [];
+        console.log('Recent Viewed:', recentViewed);
+
+        // 최근 본 상품이 최대 5개만 보이도록 제한
+        recentViewed = recentViewed.slice(-5);
+
+        if (recentViewed.length > 0) {
+            recentViewed.forEach(productId => {
+                $.ajax({
+                    method: "GET",
+                    url: `/api/products/${productId}`, // API 엔드포인트
+                    success: function(product) {
+                        console.log('Product Data:', product); // 데이터 확인
+                        let productElement = $(`
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <a href="/item/${product.id}" class="text-dark">
+                                        <img src="${product.imgUrl}" class="card-img-top" alt="${product.itemNm}">
+                                        <div class="card-body d-flex flex-column">
+                                            <h4 class="card-title">${product.itemNm}</h4>
+                                            <h3 class="card-price text-danger mt-auto">${product.price} 원</h3>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        `);
+
+                        $('#recent-products').append(productElement);
+                    },
+                    error: function(error) {
+                        console.log('API Error:', error); // API 호출 오류 확인
+                    }
+                });
+            });
+        } else {
+            $('#recent-products').append('<p>최근 본 상품이 없습니다.</p>');
+        }
+    }
+});
+
+</script>
+</body>
+</html>

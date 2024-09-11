@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:background-color="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title>게시판</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+
+    <style>
+        body {
+            background-color: white ; /* 기본 배경색 */
+            color: black; /* 기본 글자색 */
+             overflow: hidden; /* 스크롤을 비활성화합니다 */
+
+        }
+
+        .post-list {
+            margin-top: 80px;
+
+        }
+        .post-item {
+            margin-bottom: 10px;
+
+            padding: 10px;
+            border-radius: 5px;
+        }
+       .post-item a {
+        color: #000; /* 제목 링크 기본 색상을 검은색으로 설정 */
+        text-decoration: none;
+         font-family: 'Noto Sans KR', sans-serif; /* Noto Sans KR 폰트 적용 */
+        font-size: 16px; /* 폰트 크기 설정 */
+        transition: color 0.3s; /* 색상 변화에 트랜지션 효과 적용 */
+        }
+    .post-item a:hover {
+        color: #c9ab81; /* 마우스 호버 시 제목 링크 색상을 변경 */
+        }
+        .form-container {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .center-table {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+        }
+        .custom-file-upload,
+button[type="submit"],
+.text-right a.btn-primary {
+    position: relative;
+    background-color: transparent;
+    border: 1px solid #f3e5d4;
+    color: #000;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 0px;
+    display: inline-block;
+    overflow: hidden;
+    text-decoration: none; /* Remove underline from links */
+    text-align: center; /* Ensure text alignment */
+}
+
+      .custom-file-upload::after,
+button[type="submit"]::after,
+.text-right a.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(243, 229, 212, 0.5);
+    transition: left 0.3s ease-in-out;
+    z-index: -1;
+}
+
+.custom-file-upload:hover::after,
+button[type="submit"]:hover::after,
+.text-right a.btn-primary:hover::after {
+    left: 0;
+}
+  .custom-container {
+        margin-top: 160px; /* 다른 페이지와 동일한 위치로 설정 */
+    }
+
+ /* 공지사항 스타일 */
+    .notice-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 40px 0; /* 상하 여백 */
+        padding: 50px;
+        transform: translateY(20px);
+        animation: fade-in-up 1s ease-out forwards; /* 애니메이션 추가 */
+    }
+    .notice-text {
+        font-size: 20px;
+        color: #6c757d; /* 회색 글씨색 */
+        margin: 0 20px; /* 아이콘과의 간격 */
+    }
+    .paw-icon {
+        font-size: 30px;
+        color: #a5d6a7; /* 강아지 발바닥 아이콘 색상 */
+        animation: paw-waving 1s infinite; /* 애니메이션 */
+    }
+    .paw-icon.left {
+        margin-right: 10px; /* 왼쪽 아이콘과 문구 사이 간격 */
+    }
+    .paw-icon.right {
+        margin-left: 10px; /* 오른쪽 아이콘과 문구 사이 간격 */
+    }
+<!--    @keyframes paw-waving {-->
+<!--        0%, 100% {-->
+<!--            transform: translateY(0);-->
+<!--        }-->
+<!--        50% {-->
+<!--            transform: translateY(-10px);-->
+<!--        }-->
+<!--    }-->
+<!--           @keyframes fade-in-up {-->
+<!--        to {-->
+<!--            opacity: 1;-->
+<!--            transform: translateY(0);-->
+<!--        }-->
+<!--    }-->
+ /* 배경 이미지 스타일 */
+    .background-image {
+        background-image: url('/img/1234.png'); /* 배경 이미지 경로 */
+        background-repeat: repeat-x; /* 가로로 반복 */
+      background-size: 25% auto; /* 이미지 크기를 전체 가로의 25%로 설정 */
+        background-position: bottom; /* 이미지 위치 */
+        height: 100px; /* 이미지 높이 설정, 필요에 따라 조절 */
+        position: relative; /* 상대 위치 설정 */
+        width: 100%; /* 전체 너비 */
+         position: fixed; /* 화면 하단에 고정 */
+        bottom: 0; /* 하단에 위치 */
+        left: 0; /* 왼쪽에 위치 */
+ z-index: 1; /* 나무 및 나뭇잎 이미지 위에 배치 */
+         opacity: 0.9; /* 투명도 설정 (0.0: 완전히 투명, 1.0: 불투명) */
+    }
+/* 나무 이미지 */
+.tree-image {
+    background-image: url('/img/tree.png'); /* 나무 이미지 경로 */
+    background-repeat: no-repeat; /* 반복하지 않음 */
+    background-size: contain; /* 이미지 크기 조정 */
+    background-position: left bottom; /* 왼쪽 하단에 위치 */
+    height: 57%; /* 나무 이미지 높이 설정, 필요에 따라 조절 */
+    width: 500px; /* 나무 이미지 너비 설정, 필요에 따라 조절 */
+    position: absolute; /* 절대 위치 */
+    bottom: -50px; /* 하단에 위치 */
+    left: -50px; /* 왼쪽에 위치 */
+    z-index: 1; /* 배경 이미지보다 위에 배치 */
+}
+
+
+/* 나뭇잎 이미지 기본 스타일 */
+.leaf-image {
+    position: absolute; /* 절대 위치 */
+    z-index: 1; /* 나무 이미지보다 위에 배치 */
+    background-image: url('/img/leaf.png'); /* 나뭇잎 이미지 경로 */
+    background-repeat: no-repeat; /* 반복하지 않음 */
+    background-size: contain; /* 이미지 크기 조정 */
+    animation: leaf-fall 6s infinite; /* 기본 애니메이션 적용 */
+}
+
+@keyframes leaf-fall {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(50px) rotate(180deg);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateY(100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* 개별 나뭇잎 스타일 */
+.leaf-1 {
+    height: 40px; /* 나뭇잎 1의 높이 */
+    width: 40px; /* 나뭇잎 1의 너비 */
+    bottom: 50px; /* 나뭇잎 1의 상단 위치 */
+    left: 20px; /* 나뭇잎 1의 왼쪽 위치 */
+    animation-duration: 6s; /* 애니메이션 지속 시간 */
+    animation-delay: 0s; /* 애니메이션 지연 시간 */
+    animation-timing-function: ease-in-out; /* 애니메이션 타이밍 함수 */
+}
+
+.leaf-2 {
+    height: 30px; /* 나뭇잎 2의 높이 */
+    width: 30px; /* 나뭇잎 2의 너비 */
+    bottom: 50px; /* 나뭇잎 1의 상단 위치 */
+    left: 80px; /* 나뭇잎 2의 왼쪽 위치 */
+    animation-duration: 5s; /* 애니메이션 지속 시간 */
+    animation-delay: 1s; /* 애니메이션 지연 시간 */
+  animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1); /* 부드러운 애니메이션 타이밍 함수 */
+}
+
+.leaf-3 {
+    height: 50px; /* 나뭇잎 3의 높이 */
+    width: 50px; /* 나뭇잎 3의 너비 */
+   bottom: 50px; /* 나뭇잎 1의 상단 위치 */
+    left: 140px; /* 나뭇잎 3의 왼쪽 위치 */
+    animation-duration: 7s; /* 애니메이션 지속 시간 */
+    animation-delay: 2s; /* 애니메이션 지연 시간 */
+    animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1); /* 부드러운 애니메이션 타이밍 함수 */
+}
+
+.leaf-4 {
+    height: 35px; /* 나뭇잎 4의 높이 */
+    width: 35px; /* 나뭇잎 4의 너비 */
+    bottom: 50px; /* 나뭇잎 1의 상단 위치 */
+    left: 200px; /* 나뭇잎 4의 왼쪽 위치 */
+    animation-duration: 6s; /* 애니메이션 지속 시간 */
+    animation-delay: 3s; /* 애니메이션 지연 시간 */
+    animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1); /* 부드러운 애니메이션 타이밍 함수 */
+}
+
+.leaf-5 {
+    height: 45px; /* 나뭇잎 5의 높이 */
+    width: 45px; /* 나뭇잎 5의 너비 */
+    bottom: 50px; /* 나뭇잎 1의 상단 위치 */
+    left: 260px; /* 나뭇잎 5의 왼쪽 위치 */
+    animation-duration: 5s; /* 애니메이션 지속 시간 */
+    animation-delay: 4s; /* 애니메이션 지연 시간 */
+   animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1); /* 부드러운 애니메이션 타이밍 함수 */
+}
+/* 강아지 이미지 */
+.dog-image {
+    background-image: url('/img/dogtest.png'); /* 강아지 이미지 경로 */
+    background-repeat: no-repeat; /* 반복하지 않음 */
+    background-size: contain; /* 이미지 크기 조정 */
+    position: absolute; /* 절대 위치 */
+    bottom: -270px; /* 잔디 이미지 위에 위치 */
+    left: 90%; /* 중앙에 배치 */
+    transform: translateX(-50%); /* 중앙 정렬 */
+    height: 505px; /* 강아지 이미지 높이 */
+    width: 410px; /* 강아지 이미지 너비 */
+    z-index: 0; /* 나무 및 나뭇잎 이미지 위에 배치 */
+}
+  .pagination {
+              margin: 20px 0;
+          }
+
+          .pagination .page-link {
+              border-radius: 50%;
+              padding: 0.5rem 1rem;
+              transition: background-color 0.3s ease, color 0.3s ease;
+               background-color: white;
+              color: #a5d6a7;
+               border-color: beige;
+          }
+
+          .pagination .page-link:hover {
+              background-color: #a5d6a7;
+              color: white;
+          }
+
+          .form-control {
+              border-radius: 0.375rem;
+          }
+
+          .form-control:focus {
+              box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+          }
+
+          .btn-primary {
+              border-radius: 0.375rem;
+              transition: background-color 0.3s ease, transform 0.3s ease;
+               background-color: #a5d6a7;
+              border-color: white;
+          }
+
+          .btn-primary:hover {
+              background-color: #a5d6a7;
+              border-color: white;
+              transform: translateY(-2px);
+          }
+
+          .btn-primary:focus {
+              box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+          }
+
+          .row-cols-lg-auto .form-control {
+              margin-right: 10px;
+          }
+
+          /* Adjust form controls to ensure they align nicely */
+          .form-control {
+              width: auto;
+              display: inline-block;
+          }
+
+          .form-control + .form-control {
+              margin-left: 10px;
+          }
+
+        /* 검색 입력창 스타일 */
+.search-input {
+    border: none;
+    border-bottom: 2px solid #c9ab81;
+    padding: 10px;
+    font-size: 16px;
+     outline: none; /* 기본 포커스 테두리 제거 */
+    box-shadow: none; /* 포커스 시 박스 그림자 제거 */
+    background: transparent;
+    border-radius: 0;
+    transition: border-color 0.3s ease;
+    min-width: 500px; /* 최소 너비 설정 */
+    color: #000; /* 기본 라이트 모드 텍스트 색상 */
+    spellcheck: false ; /* 맞춤법 검사 비활성화 */
+    margin-right: 10px; /* 검색창과 버튼 간의 간격 조정 */
+}
+
+.search-input:focus {
+    border-bottom-color: #a5d6a7;
+    outline: none; /* 포커스 시 기본 테두리 제거 */
+    box-shadow: none; /* 포커스 시 박스 그림자 제거 */
+    spellcheck: false; /* 맞춤법 검사 비활성화 */
+}
+
+/* 검색 버튼 스타일 */
+.search-button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 10px;
+    color: #c9ab81;
+    transition: color 0.3s ease;
+}
+
+.search-button:hover {
+    color: #a5d6a7;
+}
+
+    </style>
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <!-- JavaScript Functions -->
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            var csrfToken = $("meta[name='_csrf']").attr("content");
+            var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+            $("table").on("click", ".post-link", function(event) {
+                event.preventDefault();
+
+                var postId = $(this).data("post-id");
+                var $viewCountElement = $(this).closest("tr").find(".view-count");
+
+                $.ajax({
+                    url: '/posts/increaseViewCount/' + postId,
+                    type: 'POST',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader(csrfHeader, csrfToken);
+                    },
+                    success: function(response) {
+                        console.log('게시물 id ' + postId + ' 조회수 증가 완료');
+                        var newViewCount = parseInt($viewCountElement.text()) + 1;
+                        $viewCountElement.text(newViewCount);
+                        window.location.href = '/posts/' + postId;
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('조회수 증가 오류: ' + errorThrown);
+                    }
+                });
+            });
+
+        });
+
+    </script>
+
+
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+
+<!--    &lt;!&ndash; 공지사항 &ndash;&gt;-->
+<!--    <div class="notice-container">-->
+<!--        <i class="fa-solid fa-paw paw-icon left"></i>-->
+<!--        <p class="notice-text">공지사항을 확인해주세요</p>-->
+<!--        <i class="fa-solid fa-paw paw-icon right"></i>-->
+<!--    </div>-->
+
+    <!-- 글 작성하기 버튼 -->
+    <div class="text-right" th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+        <a th:href="@{/posts/write}" class="btn btn-primary"  style=" position: absolute; right: 26%; top: 35%;">글 작성하기</a>
+    </div>
+
+    <div  class="container custom-container">
+    <!-- 최신 게시글 섹션 -->
+    <div class="row center-table" style="margin-top:280px; ">
+
+        <div class="col-md-10">
+            <!-- 검색 폼 -->
+            <form action="/posts/search" method="get" class="form-inline my-2 my-lg-0 d-flex justify-content-center">
+                <input class="search-input form-control mr-sm-2" type="search" placeholder="궁금하신 내용을 검색해보세요" aria-label="Search" name="keyword" spellcheck="false" style="width: 500px; height: 50px; margin-top: 4px;    ">
+                <button type="submit" class="search-button" style="margin-left: 5px; height: 50px; margin-top: 4px;">검색</button>
+
+            </form>
+
+            <!-- 총 게시물 수 PostController 에 totalPosts 를 넣고 게시물 총 개수를 나오게 함  -->
+            <!-- 게시물 숫자에만 #c9ab81 컬러를 줌 -->
+            <div class="row" >
+                <div class="col-md-12">
+                    <p>총 <span th:text="${totalPosts}" style="color: #c9ab81 !important;" ></span>건</p>
+                </div>
+            </div>
+
+
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>순번</th>
+                    <th>제목</th>
+                    <th>작성일</th>
+                    <th>조회수</th>
+                </tr>
+                </thead>
+                <tbody id="postList">
+                <tr th:each="post, postStat : ${posts}" class="post-item" style=" height: 80px;" >
+                    <td th:text="${startCount + postStat.count - 1}"></td>
+                    <td>
+                        <a th:href="@{/posts/{id}(id=${post.id})}" th:text="${post.title}" th:data-post-id="${post.id}" class="post-link"></a>
+                    </td>
+                    <td th:text="${#temporals.format(post.createdDate, 'yyyy-MM-dd')}"></td>
+                    <td class="view-count" th:text="${post.viewCount}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- 페이지네이션 -->
+            <div class="row justify-content-center" style="margin-top: 90px;">
+                <div class="col-md-8">
+                    <div class="pagination d-flex justify-content-center">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage eq 0} ? 'disabled' : ''">
+                                <a th:href="@{/posts/(page=0)}" aria-label="Previous" class="page-link">
+                                    <span aria-hidden="true">Previous</span>
+                                </a>
+                            </li>
+                            <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
+                                <a th:href="@{/posts/(page=${pageNum})}" th:text="${pageNum + 1}" th:classappend="${pageNum eq currentPage} ? 'active' : ''" class="page-link"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled' : ''">
+                                <a th:href="@{/posts/(page=${currentPage + 1})}" aria-label="Next" class="page-link">
+                                    <span aria-hidden="true">Next</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 배경 이미지 -->
+<div class="background-image"></div>
+
+<!-- 나무 이미지 -->
+<div class="tree-image"></div>
+
+
+
+<!-- 강아지 이미지 -->
+<div class="dog-image"></div>
+
+<!-- 나뭇잎 이미지 -->
+<div class="leaf-image leaf-1"></div>
+<div class="leaf-image leaf-2"></div>
+<div class="leaf-image leaf-3"></div>
+<div class="leaf-image leaf-4"></div>
+<div class="leaf-image leaf-5"></div>
+</body>
+</html>

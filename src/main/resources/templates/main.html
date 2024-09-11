@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Main 페이지</title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        html, body {
+            height: 100%; /* 전체 화면 높이 */
+           margin: 0;
+           overflow-x: hidden; /* 수평 스크롤 방지 */
+           overflow-y: auto; /* 수직 스크롤 가능 */
+           opacity: 1; /* 페이지 로딩 전에는 보이지 않게 설정 */
+           transition: opacity 1s ease; /* 페이지가 보일 때의 애니메이션 설정 */
+        }
+        body {
+            font-size: 15px;
+            font-family: 'Spoqa Han Sans', sans-serif;
+            line-height: 1.5;
+            word-break: keep-all;
+            text-align: center;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%; /* 화면 높이에 맞게 설정 */
+            background-image: url('img/dogs.jpg');
+            background-repeat: no-repeat; /* 배경 이미지가 반복되지 않도록 */
+            background-size: cover;
+            background-position: top center ; /* 이미지 상단을 화면 상단에 맞춤 */
+            overflow-x: hidden;
+            position: relative;
+
+        }
+
+
+
+       /* 로딩 화면 스타일 */
+       .loading-screen {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+<!--           background-image: url('img/dogss.jpg');-->
+           background-size: cover;
+           background-position: center;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           z-index: 9999;
+           overflow: hidden; /* 자식 요소가 화면을 넘어가지 않도록 설정 */
+           transition: opacity 1s ease-out, visibility 1s ease-out;
+           opacity: 1; /* 로딩 화면이 기본적으로 보이도록 설정 */
+       }
+
+       .loading-screen.hidden {
+           opacity: 0;
+           visibility: hidden;
+           pointer-events: none; /* 로딩 화면이 사라지면 클릭 불가능하게 설정 */
+       }
+
+
+       /* 텍스트 스타일 */
+       .loading-text {
+           position: absolute;
+           width: 100%;
+           text-align: center;
+           z-index: 1000;
+       }
+
+       .loading-text span {
+            display: inline-block;
+   font-size: 2.5em;
+   color: #fff;
+   font-weight: bold;
+   opacity: 0; /* 기본적으로 보이지 않도록 설정 */
+   transform: translateY(50px); /* 시작 위치 조정 */
+   animation: slideUp 1.5s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+       }
+
+       .loading-text span:first-child {
+           position: absolute;
+           left: 28%;
+
+           animation-delay: 0s; /* 첫 번째 텍스트의 애니메이션 시작 시간 */
+       }
+
+       .loading-text span:nth-child(2) {
+           position: absolute;
+           right: 20%; /* 오른쪽으로 이동 */
+           animation-delay: 0.5s; /* 두 번째 텍스트의 애니메이션 시작 시간 */
+       }
+
+       @keyframes slideUp {
+           0% {
+               transform: translateY(100px);
+               opacity: 0;
+           }
+           100% {
+               transform: translateY(0);
+               opacity: 1;
+           }
+       }
+
+       @keyframes fadeIn {
+           from {
+               opacity: 0;
+               transform: translateY(50px);
+           }
+           to {
+               opacity: 1;
+               transform: translateY(0);
+           }
+       }
+
+           /* 비눗방울 애니메이션 */
+       .bubble {
+           position: absolute;
+
+           background-image: url('img/bubles.png');
+           background-size: cover;
+           background-position: center;
+           animation: float 6s ease-in-out infinite;
+           opacity: 0.8;
+            z-index: 999; /* 다른 요소보다 위에 표시되도록 설정 */
+       }
+
+       @keyframes float {
+           0% {
+       transform: translateY(100px) scale(0.8) rotate(0deg);
+       opacity: 0.8;
+   }
+   50% {
+       transform: translateY(-50px) scale(1.2) rotate(-17deg); /* 기울어지는 효과 추가 */
+       opacity: 0.6;
+   }
+   100% {
+       transform: translateY(100px) scale(0.8) rotate(0deg);
+       opacity: 0.8;
+   }
+}
+
+
+       /* 각 비눗방울 위치 설정 */
+       .bubble:nth-child(1) {
+         width: 80px;
+   height: 80px;
+   right: 20%;
+   top: 90%;
+           animation-delay: 0s;
+       }
+
+       .bubble:nth-child(2) {
+          width: 100px;
+   height: 100px;
+   right: 30%;
+   top: 10%;
+           animation-delay: 0s;
+       }
+        .bubble:nth-child(3) {
+          width: 90px;
+   height: 90px;
+   left: 27%;
+   top: 70%;
+           animation-delay: 0s;
+       }
+           .bubble:nth-child(4) {
+          width: 130px;
+         height: 120px;
+        left: 30%;
+         top:30%;
+           animation-delay: 0s;
+       }
+
+   .bubble:nth-child(5) {
+          width: 70px;
+   height: 70px;
+   left: 10%;
+   top: 50%;
+           animation-delay: 0s;
+       }
+       .bubble:nth-child(6) {
+          width: 90px;
+   height: 90px;
+   left: 20%;
+   top: 10%;
+           animation-delay: 0s;
+       }
+
+
+
+
+
+
+
+
+       .bubble:nth-child(4) {
+            width: 130px;
+            height: 110px;
+            left: 80%;
+            top: 30%;
+           animation-delay: 0s;
+       }
+
+         /* 메인 페이지 내용 숨기기 */
+       .main-content {
+           opacity: 0;
+           visibility: hidden;
+           transition: opacity 1s ease-in, visibility 1s ease-in;
+       }
+
+       .main-content.visible {
+           opacity: 1;
+           visibility: visible;
+       }
+
+
+        .scrollable {
+            position: relative;
+            z-index: 4;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+
+
+
+
+
+
+        /* 기본 스크롤바 숨기기 (웹킷 브라우저에서만 적용됨) */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        .fade-in-text {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+            position: absolute;
+            top: 41%;
+            left: 20%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            color: #fff;
+              font-family: 'squareRound';
+        }
+
+        .fade-in-text.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+        }
+
+        .fade-in-text h1 {
+            margin-top: 0;
+            font-size: 2.5em;
+        }
+
+        .fade-in-text p {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+
+       .main-link {
+    --mask-size: 100px;
+    --mask-x: 0px;
+    --mask-y: 0px;
+    word-break: keep-all;
+    text-align: center;
+    color: #333;
+    text-decoration: none;
+    font-family: 'Spoqa Han Sans', sans-serif;
+    display: inline-block;
+    position: relative;
+    width: 200px;
+    font-size: 16px;
+    line-height: 50px;
+    background: #fff;
+    border-radius: 25px;
+    font-weight: 700;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+    z-index: 6;
+}
+
+.main-link:hover,
+.main-link.magnified {
+    background-color: #a5d6a7; /* 연한 초록색으로 변경 */
+    color: #fff;
+    transform: scale(1.05); /* 약간 확대 효과 */
+}
+
+        /* 사용자 정의 커서 */
+        .mouse__cursor {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.8); /* 밝은 경계선 */
+
+            background: rgba(255, 255, 255, 0); /* 투명 배경 */
+            background-size: cover;
+            background-position: center;
+
+            pointer-events: none;
+            mix-blend-mode: lighten; /* 조명 효과를 위한 설정 */
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); /* 조명 효과 */
+            transition: box-shadow 0.3s ease;
+        }
+
+  /* 동그라미 애니메이션 */
+@keyframes radar-pulse {
+  0% {
+        transform: scale(0.5);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+}
+
+.radar {
+   --mask-size: 15.625vw;
+    --mask-x: 0px;
+    --mask-y: 0px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: subpixel-antialiased;
+    font-size: 12px;
+    font-family: 'Spoqa Han Sans', sans-serif;
+    line-height: 1.5;
+    color: #333;
+    word-break: keep-all;
+    visibility: inherit;
+    -webkit-appearance: none;
+    padding: 0;
+    display: block;
+    position: absolute;
+    top: 18%;
+    left: 5%;
+    width: 30.125vw;
+    height: 30.125vw;
+    margin: 0 auto;
+    background: #ccc;
+    border-radius: 50%;
+    animation: radar-pulse 2.5s infinite; /* 애니메이션 적용 */
+    z-index: 2;
+
+
+}
+     .about02 {
+    --mask-size: 100px;
+    --mask-x: 0px;
+    --mask-y: 0px;
+    font-size: 15px;
+    font-family: 'Spoqa Han Sans', sans-serif;
+    line-height: 1.5;
+    color: #333;
+    word-break: keep-all;
+    visibility: inherit;
+    margin: 0;
+    padding: 0;
+    margin-top: 160px !important;
+    position: relative;
+    width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+  .butterfly {
+            position: absolute;
+            top: 30%; /* 화면 안쪽으로 조정 */
+             right: 15%; /* 화면 안쪽으로 조정 */
+            width: 112px;
+            height: 112px;
+            background-image: url('img/birds.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 5;
+
+           animation: fly-around 10s linear infinite;
+           //animation: fly-around 10s cubic-bezier(0.42, 0, 0.58, 1) infinite; /* 부드럽고 자연스러운 움직임 */
+        }
+
+@keyframes fly-around {
+    0% {
+        transform: translateX(150px) translateY(0) rotate(0deg) scale(1);
+    }
+    25% {
+        transform: translateX(0) translateY(150px) rotate(-40deg) scale(1.2);
+    }
+    50% {
+        transform: translateX(-150px) translateY(0) rotate(30deg) scale(1);
+    }
+    75% {
+        transform: translateX(0) translateY(-150px) rotate(-20deg) scale(1.2);
+    }
+    100% {
+        transform: translateX(150px) translateY(0) rotate(0deg) scale(1);
+    }
+}
+     /* main-page 클래스가 적용된 페이지의 스타일 */
+.main-page .navbar-brand {
+    color: #fff; /* 메인 페이지에서 글씨 색상 하얀색으로 변경 */
+}
+
+.main-page .nav-link {
+    color: #fff; /* 메인 페이지에서 링크 색상 하얀색으로 변경 */
+}
+
+.main-page .nav-link:hover {
+    color: #a5d6a7; /* hover 시 색상 조정 (필요시 변경) */
+}
+
+
+
+.t_btn {
+   --bg01: #2bacf0;
+    word-break: keep-all;
+    list-style: none;
+    box-sizing: inherit;
+    -webkit-text-size-adjust: none;
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.6;
+    font-family: 'Pretendard';
+    color: #7d7d7d;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    transition: all .3s ease;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .3);
+    position: fixed; /* 변경: position을 fixed로 설정 */
+    bottom: 20px; /* 화면 하단에서 20px 거리 */
+    left: 50%;
+    transform: translateX(-50%); /* 수평 중앙 정렬 */
+}
+
+.t_btn:hover {
+    background-color: var(--bg01); /* 마우스 오버 시 버튼 배경색 변경 */
+    color: #fff; /* 마우스 오버 시 글자색 변경 */
+    border-color: rgba(255,255,255,.5); /* 마우스 오버 시 테두리 색상 변경 */
+    transform: scale(1.1); /* 마우스 오버 시 버튼 확대 */
+}
+
+.pc_img {
+    width: 50%; /* 아이콘 크기를 버튼 크기에 맞게 조정 */
+    height: auto;
+}
+    </style>
+</head>
+
+<body class="main-page">
+<!-- 로딩 화면 -->
+<div class="loading-screen">
+    <div class="loading-text">
+        <span><i class="fas fa-paw"></i> 반려견과</span>
+        <span>함께 하는 세상<i class="fas fa-globe"></i> </span>
+    </div>
+    <!-- 비눗방울 추가 -->
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+</div>
+
+<!-- 메인 페이지 내용 -->
+<div class="main-content">
+
+
+
+    <!-- 헤더 부분은 이곳에 삽입 -->
+    <div th:replace="~{fragments/header::header}" class="header"></div>
+
+    <!-- 동그라미 모양의 배경 -->
+    <span class="radar"></span>
+
+    <div class="scrollable">
+        <!-- 본문 내용 -->
+        <div class="fade-in-text">
+            <h1>반려견과 함께하는 세상</h1>
+            <p>그것이 바로 포에독입니다</p>
+            <a href="/product-list" class="main-link" id="main-link">전체 상품 보기</a>
+        </div>
+    </div>
+    <div class="butterfly"></div>
+
+    <!-- 사용자 정의 커서 -->
+    <div class="mouse__cursor"></div>
+    <button class="t_btn">
+        <img src="img/sec01_ico01_pc.png" class="pc_img" alt="">
+
+    </button>
+
+</div>
+
+<script>
+    document.addEventListener('mousemove', function(e) {
+        const cursor = document.querySelector('.mouse__cursor');
+        const mainLink = document.querySelector('.main-link');
+        const x = e.clientX;
+        const y = e.clientY;
+
+        cursor.style.left = `${x}px`;
+        cursor.style.top = `${y}px`;
+
+        // Check if cursor overlaps the button
+        const linkRect = mainLink.getBoundingClientRect();
+        if (
+            x > linkRect.left &&
+            x < linkRect.right &&
+            y > linkRect.top &&
+            y < linkRect.bottom
+        ) {
+            mainLink.classList.add('magnified');
+            cursor.style.boxShadow = '0 0 40px rgba(255, 255, 255, 0.9)'; // 확대된 조명 효과
+        } else {
+            mainLink.classList.remove('magnified');
+            cursor.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.8)'; // 기본 조명 효과
+        }
+    });
+  document.addEventListener('DOMContentLoaded', function() {
+            // 로딩 화면 요소 선택
+            const loadingScreen = document.querySelector('.loading-screen');
+            const mainContent = document.querySelector('.main-content');
+
+            // 3초 후 로딩 화면을 숨기고 메인 페이지를 표시
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden'); // 로딩 화면 숨기기
+                mainContent.classList.add('visible'); // 메인 페이지 보이게 하기
+            }, 2000); // 3초 대기
+
+            const fadeInText = document.querySelector('.fade-in-text');
+            fadeInText.classList.remove('visible');
+            setTimeout(() => {
+                fadeInText.classList.add('visible');
+            }, 100); // 100ms 딜레이
+
+
+
+        document.querySelector('.mouse__cursor').style.visibility = 'visible';
+    });
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+    var scrollButton = document.querySelector('.t_btn');
+
+    scrollButton.addEventListener('click', function() {
+        window.scrollBy({
+            top: window.innerHeight, // 현재 뷰포트 높이만큼 스크롤
+            behavior: 'smooth' // 부드러운 스크롤 애니메이션
+        });
+    });
+});
+
+window.addEventListener('scroll', function() {
+    const fadeInText = document.querySelector('.fade-in-text');
+    const thumb = document.querySelector('.thumb');
+    const scrollableHeight = document.body.scrollHeight - window.innerHeight;
+    const scrollRatio = window.scrollY / scrollableHeight;
+
+    // `thumb`의 위치를 스크롤 비율에 따라 조정
+    const thumbHeight = thumb.offsetHeight;
+    const maxThumbTop = document.querySelector('.mainScrollBar').offsetHeight - thumbHeight;
+    const thumbTop = scrollRatio * maxThumbTop;
+
+    thumb.style.top = `${thumbTop}px`;
+
+    // fade-in 애니메이션 트리거
+    if (fadeInText) {
+        const rect = fadeInText.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 100) {
+            fadeInText.classList.add('visible');
+        } else {
+            fadeInText.classList.remove('visible');
+        }
+    }
+});
+
+
+</script>
+
+</body>
+</html>

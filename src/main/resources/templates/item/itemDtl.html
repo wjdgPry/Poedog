@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <title>결제 페이지</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <meta name ="_csrf" th:content="${_csrf.token}"/>
+    <meta name ="_csrf_header" th:content="${_csrf.headerName}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script th:inline="javascript">
+
+        $(document).ready(function(){
+         Kakao.init('e8d0a49b456a35f970f6260eba386efc'); // 앱 키를 입력하세요
+
+        calculateTotalPrice();
+
+        $("#count").change(function(){
+        calculateTotalPrice();
+          });
+        });
+
+        function calculateTotalPrice(){
+        var count = $("#count").val();
+        var price = $("#price").val();
+        var totalPrice = price * count;
+        $("#totalPrice").html(totalPrice + '원');
+        }
+
+        function order(){
+        var token = $("meta[name='_csrf']").attr("content");
+         var header = $("meta[name='_csrf_header']").attr("content");
+
+        var url = "/order";
+        var paramData = {
+        itemId : $("#itemId").val(),
+        count : $("#count").val()
+        }
+
+        var param = JSON.stringify(paramData);
+
+        $.ajax({
+        url : url,
+        type : "POST",
+        contentType : "application/json",
+        data : param,
+        beforeSend : function(xhr){
+        /*데이터 전송하기 전에 헤더에 csrf 값을 설정 */
+        xhr.setRequestHeader(header, token);
+        },
+        dataType : "json",
+        cache : false,
+        success : function(result, status){
+        console.log(result)
+
+        alert("결제내역으로 이동합니다.");
+         location.href='/payment/'+result;
+        },
+        error : function(jqXHR, status, error){
+        if(jqXHR.status == '401'){
+           alert('로그인 후 이용해주세요.');
+           location.href='/members/login';
+        }else{
+           alert('로그인 후 이용해주세요');
+           location.href='/members/login';
+              }
+            }
+          });
+        }
+
+
+       function showNotification(message) {
+    const notificationElement = document.getElementById('notification');
+    const messageElement = document.getElementById('notification-message');
+
+    messageElement.textContent = message;
+    notificationElement.classList.remove('hidden');
+    notificationElement.classList.add('show');
+
+    // 3초 후 알림 사라지기
+    setTimeout(() => {
+        notificationElement.classList.remove('show');
+        notificationElement.classList.add('hidden');
+    }, 3000); // 3초 후 사라짐
+}
+
+// 기존 addCart 함수 수정
+function addCart() {
+    var token = $("meta[name='_csrf']").attr("content");
+    var header = $("meta[name='_csrf_header']").attr("content");
+
+    var url = "/cart";
+    var paramData = {
+        itemId: $("#itemId").val(),
+        count: $("#count").val()
+    };
+
+    var param = JSON.stringify(paramData);
+
+    $.ajax({
+        url: url,
+        type: "POST",
+        contentType: "application/json",
+        data: param,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader(header, token);
+        },
+        dataType: "json",
+        cache: false,
+        success: function (result, status) {
+            showNotification("상품을 장바구니에 담았습니다.");
+            setTimeout(() => {
+                location.href = '/cart';
+            }, 2000); // 알림이 사라진 후 장바구니로 이동
+        },
+        error: function (jqXHR, status, error) {
+            if (jqXHR.status == '401') {
+                alert('로그인 후 이용해주세요.');
+                location.href = '/members/login';
+            } else {
+                alert(jqXHR.responseText);
+            }
+        }
+    });
+}
+  function showShareModal() {
+        document.getElementById('shareModal').style.display = 'block';
+        document.getElementById('currentUrl').textContent = window.location.href; // 현재 페이지의 URL 표시
+    }
+
+    function closeShareModal() {
+        document.getElementById('shareModal').style.display = 'none';
+    }
+
+    function copyUrl() {
+        const url = window.location.href; // 현재 페이지의 URL 가져오기
+        navigator.clipboard.writeText(url).then(function() {
+            alert('URL이 복사되었습니다: ');
+        }, function(err) {
+            alert('URL 복사에 실패했습니다.');
+        });
+    }
+
+   function share() {
+            var url = encodeURIComponent(window.location.href); // 현재 페이지 URL
+            var title = encodeURIComponent(document.title); // 현재 페이지 제목
+            var shareURL = "https://share.naver.com/web/shareView?url=" + url + "&title=" + title;
+
+            // 새 창에서 공유 URL 열기
+            window.open(shareURL, '_blank');
+        }
+
+
+        function shareToKakaoTalk() {
+        const url = window.location.href; // 현재 페이지의 URL 가져오기
+        const title = document.title; // 현재 페이지의 제목 가져오기
+
+        // 상품 이미지 URL 동적으로 가져오기
+        const imageUrl = document.querySelector('.repImg').src;
+
+        Kakao.Link.sendDefault({
+            objectType: 'feed',
+            content: {
+                title: title,
+                description: '상품 설명', // 선택적 설명
+                imageUrl: imageUrl,
+                link: {
+                    mobileWebUrl: url,
+                    webUrl: url
+                }
+            },
+            buttons: [
+                {
+                    title: '상품 보기',
+                    link: {
+                        mobileWebUrl: url,
+                        webUrl: url
+                    }
+                }
+            ]
+        });
+    }
+         function shareToFacebook() {
+            const url = window.location.href; // 현재 페이지의 URL 가져오기
+            const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            window.open(facebookLink, '_blank');
+        }
+    </script>
+
+    <style>
+        :root {
+        --primary-bg-color: #ffffff;
+        --secondary-bg-color: #a5d6a7;
+        --text-color: #000000;
+        --border-color: #a5d6a7;
+        --font-family: 'PretendardWeb', sans-serif;
+    }
+
+    body {
+        font-family: var(--font-family);
+        color: var(--text-color);
+        background-color: var(--primary-bg-color);
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .header {
+        background-color: var(--secondary-bg-color);
+        padding: 15px 0;
+        text-align: center;
+    }
+
+    .repImgDiv {
+        margin-right: 15px;
+        width: 50%;
+    }
+
+    .repImg {
+        width: 100%;
+        height: auto;
+        max-height: 400px;
+        object-fit: cover;
+    }
+
+    .wd50 {
+        width: 50%;
+    }
+
+    .p {
+        font-size: 20px;
+    }
+
+    .mgb-15 {
+        margin-bottom: 15px;
+    }
+
+    .mgt-30 {
+        margin-top: 30px;
+    }
+
+    .mgt-50 {
+        margin-top: 50px;
+    }
+
+    .text-right {
+        text-align: left;
+    }
+
+    .font-weight-bold {
+        font-weight: bold;
+    }
+
+    .badge {
+        border-radius: 5px;
+    }
+
+    .btn {
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+
+    .btn-light {
+        background-color: var(--primary-bg-color);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-primary {
+        background-color: var(--secondary-bg-color);
+        border: none;
+        color: var(--primary-bg-color);
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        color: var(--primary-bg-color);
+    }
+
+    .form-control {
+        border-color: var(--border-color);
+    }
+
+    .input-group-text {
+        background-color: var(--primary-bg-color);
+        border-color: var(--border-color);
+    }
+
+    .lead {
+        font-size: 18px;
+    }
+
+    hr.my-4 {
+        border-top: 2px solid var(--border-color);
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+           .custom-file-upload,
+        button[type="submit"],
+        .text-right a.btn-primary {
+            position: relative;
+            background-color: transparent;
+            border: 1px solid #a5d6a7;
+            color: #000;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-block;
+            overflow: hidden;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .custom-file-upload::after,
+        button[type="submit"]::after,
+        .text-right a.btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(243, 229, 212, 0.5);
+            transition: left 0.3s ease-in-out;
+            z-index: -1;
+        }
+
+        .custom-file-upload:hover::after,
+        button[type="submit"]:hover::after,
+        .text-right a.btn-primary:hover::after {
+            left: 0;
+        }
+         /* 리뷰 관련 CSS */
+        .review-section {
+            margin-top: 30px;
+        }
+        .review {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .review-form {
+            margin-top: 20px;
+        }
+
+
+          /* 공유 모달 스타일 */
+        ._spi_card_ly {
+            user-select: text;
+            font-family: HelveticaNeue, AppleSDGothicNeo-Regular, Arial, sans-serif !important;
+            z-index: 20010 !important;
+            width: 290px !important;
+            height: 260px !important;
+            padding-bottom: 20px !important;
+            border-radius: 13px !important;
+            box-sizing: border-box;
+            background: white;
+            line-height: 17px !important;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0px -2px 6px rgba(87, 98, 104, 0.08), 0px 5px 10px rgba(87, 98, 104, 0.2);
+            position: absolute !important;
+            left: 50% !important;
+            transform: translate3d(-50%, 0, 0) !important;
+            display: block;
+            top: 284.5px;
+            outline: none;
+             height: auto; /* 높이 자동 조절 */
+        }
+        .blog-icon {
+    width: 50px; /* 이미지 너비 설정 */
+    height: 50px; /* 이미지 높이 설정 */
+    vertical-align: middle; /* 텍스트와 이미지의 수직 정렬 */
+    margin-right: 8px; /* 이미지와 텍스트 간격 조정 */
+}
+        .kakao-icon {
+    width: 50px; /* 이미지 너비 설정 */
+    height: 50px; /* 이미지 높이 설정 */
+    vertical-align: middle; /* 텍스트와 이미지의 수직 정렬 */
+    margin-right: 8px; /* 이미지와 텍스트 간격 조정 */
+}
+.facebook-icon {
+    width: 50px; /* 아이콘의 너비를 설정합니다 */
+    height: 50px; /* 아이콘의 높이를 설정합니다 */
+    vertical-align: middle; /* 텍스트와 아이콘의 수직 정렬을 맞춥니다 */
+    margin-right: 8px; /* 아이콘과 텍스트 사이의 간격을 조정합니다 */
+}
+
+        .spi_card_title {
+               user-select: text;
+    font-family: HelveticaNeue, AppleSDGothicNeo-Regular, Arial, sans-serif !important;
+    box-sizing: border-box;
+    display: block !important;
+    padding: 27px 0 18px !important;
+    color: #1e1e23 !important;
+    font-size: 19px !important;
+    line-height: 26px !important;
+    text-align: center !important;
+    font-weight: bold !important;
+        }
+
+        .spi_area {
+            visibility: visible;
+            text-align: center;
+        }
+
+        .spi_swipe {
+            width: 285px;
+        }
+
+        .spi_swipe_area {
+            width: 285px;
+            transition-duration: 0ms;
+        }
+
+        .spim_be {
+            user-select: text;
+            font-family: HelveticaNeue, AppleSDGothicNeo-Regular, Arial, sans-serif !important;
+            visibility: visible;
+            box-sizing: border-box;
+            text-decoration: none;
+            float: left !important;
+            width: 63px !important;
+            height: 65px !important;
+            margin: 0 0 16px !important;
+            color: #5a5a5a !important;
+            font-size: 13px !important;
+            line-height: 16px !important;
+            white-space: nowrap !important;
+            text-align: center !important;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: white;
+        }
+
+        .spi_copyurl {
+
+        font-family: HelveticaNeue, AppleSDGothicNeo-Regular, Arial, sans-serif !important;
+    text-align: center !important;
+    box-sizing: border-box;
+
+    float: right !important;
+<!--    min-width: 51px !important;-->
+    justify-content: center;
+    align-items: center;
+    margin-left: 30px !important;
+    padding: 0 5px !important;
+    color: #767678 !important;
+    font-size: 13px !important;
+
+    border: 1px solid #e6e6ea !important;
+   border-radius: 9px 9px 9px 0 !important;
+    background: white !important;
+    user-select: auto;
+     display: flex; /* Flexbox를 사용하여 텍스트와 버튼을 수평으로 배치 */
+
+        }
+
+        ._spi_input_copyurl._spi_copyurl_txt.spi_copyurl_url {
+        margin-right: 10px; /* 버튼과 URL 사이의 간격 조정 */
+    font-family: HelveticaNeue, AppleSDGothicNeo-Regular, Arial, sans-serif !important;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block !important;
+    padding: 0 7px !important;
+    color: #2196f3;
+    font-size: 13px !important;
+    height: 42px !important;
+    line-height: 42px !important;
+    border: 1px solid #e6e6ea !important;
+    border-radius: 9px 0 0 9px !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+    user-select: auto;
+
+}
+
+/* URL 복사와 닫기 버튼을 가운데 정렬 */
+.spi_copyurl, .spi_close {
+    text-align: center; /* 가운데 정렬 */
+    margin-top: 10px; /* 위아래 여백 추가 */
+}
+
+/* 닫기 버튼 스타일 */
+.spi_close {
+    user-select: text;
+    font-size: 12px;
+    font-family: HelveticaNeue, AppleSDGothicNeo-Regular, Arial, sans-serif !important;
+    line-height: 17px !important;
+    box-sizing: border-box;
+    background-image: url(https://ssl.pstatic.net/static/common/spi/2024/0607/sp_spi_layer.png);
+    background-size: 282px 265px;
+    background-position: -252px -182px;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    overflow: hidden !important;
+    display: block !important;
+    color: transparent !important;
+    position: absolute; /* 위치를 절대적으로 설정 */
+    top: 10px; /* 상단 여백 설정 */
+    right: 10px; /* 우측 여백 설정 */
+}
+
+
+
+/* 아이템 이름과 버튼을 포함하는 컨테이너 */
+.item-name-container {
+    flex: 1; /* 아이템 이름이 가능한 모든 공간을 차지하도록 설정 */
+    margin-right: 10px; /* 아이템 이름과 버튼 사이의 간격 */
+}
+
+/* 공유하기 버튼 스타일 */
+.share-button {
+
+    display: flex; /* Flexbox를 사용하여 아이콘과 텍스트를 수평으로 정렬 */
+    align-items: center; /* 아이콘과 텍스트를 수직으로 중앙 정렬 */
+    background-color: #a5d6a7; /* 버튼의 배경색 */
+    color: #ffffff; /* 버튼의 텍스트 및 아이콘 색상 */
+    border: none; /* 버튼의 기본 테두리 제거 */
+    border-radius: 5px; /* 버튼의 모서리를 둥글게 */
+    padding: 10px 9px; /* 버튼의 내부 여백 */
+    font-size: 10px; /* 버튼 텍스트 크기 */
+    cursor: pointer; /* 마우스 커서를 포인터로 변경 */
+    transition: background-color 0.3s, transform 0.2s; /* 배경색과 크기 변화에 대한 전환 효과 */
+    outline: none; /* 버튼의 포커스 테두리 제거 */
+}
+
+.share-button i {
+    margin-right: 8px; /* 아이콘과 텍스트 사이의 간격 */
+    font-size: 15px; /* 아이콘 크기 */
+}
+
+.share-button:hover {
+    background-color: #a5d6a7; /* 마우스를 올렸을 때의 배경색 */
+    transform: scale(1.05); /* 버튼이 약간 확대됨 */
+}
+
+.share-button:active {
+    background-color: #a5d6a7; /* 버튼을 클릭했을 때의 배경색 */
+    transform: scale(0.98); /* 버튼이 클릭될 때 약간 축소됨 */
+}
+
+.notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white; /* 녹색 배경색 */
+    color:  black; /* 흰색 텍스트 색상 */
+    padding: 15px;
+    border-radius: 5px;
+    z-index: 1000; /* 다른 요소들 위에 표시되도록 */
+    height: 100px;
+    font-size: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    display: none; /* 기본적으로 숨김 */
+ justify-content: center; /* 수평 중앙 정렬 */
+    align-items: center; /* 수직 중앙 정렬 */
+}
+
+.notification.show {
+    display: flex;
+    flex-direction: column; /* 수직 배치 */
+    align-items: center; /* 수평 중앙 정렬 */
+    animation: slideIn 0.5s, fadeOut 0.5s 3s; /* 애니메이션 적용 */
+}
+
+.notification-content {
+    position: relative;
+     display: inline-block; /* 텍스트와 이미지가 함께 정렬될 수 있도록 */
+     top:25px;
+}
+
+.notification-icon {
+ position: absolute;
+    width: 45px; /* 체크 이미지의 크기 조정 */
+    height: 45px;
+    position: absolute; /* 절대 위치 지정 */
+    top: 0px; /* 텍스트 위에 위치 */
+    left: 50%;
+    transform: translateX(-50%); /* 수평 중앙 정렬 */
+
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/header::header}" class="header"></div>
+<div layout:fragment="content" style="margin-left:25%; margin-right:25%; margin-top: 200px;">
+
+
+    <input type="hidden" id="itemId" th:value="${item.id}">
+
+    <div class="d-flex">
+        <div class="repImgDiv">
+            <img th:src="${item.itemImgDtoList[0].imgUrl}" class="rounded repImg" th:alt="${item.itemNm}">
+
+        </div>
+        <div class="wd50">
+            <span th:if="${item.itemSellStatus == T(com.shop.constant.ItemSellStatus).SELL}"
+                  class="badge bg-primary mgb-15">판매중</span>
+            <span th:unless="${item.itemSellStatus == T(com.shop.constant.ItemSellStatus).SELL}"
+                  class="badge bg-primary mgb-15">품절</span>
+
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="item-name-container">
+                    <div class="h4" th:text="${item.itemNm}"></div>
+                </div>
+                <button class="share-button" onclick="showShareModal()">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+
+            <!-- 공유하기 모달 -->
+            <div class="_spi_card_ly" id="shareModal" style="display: none;">
+                <strong class="h_spi_card spi_card_title">공유하기</strong>
+                <div class="_spi_card spi_area">
+                    <div class="spi_swipe">
+                        <div class="spi_swipe_area" style="margin-left: 50px;">
+                            <a href="#" class="spim_be link_blog _spi_blog" data-button="blog" onclick="share()">
+                                <img src="/img/logol.png" alt="블로그" class="blog-icon">
+                            </a>
+                            <a href="#" class="spim_be link_kakaotalk _spi_kakaotalk" data-button="kakaotalk" onclick="shareToKakaoTalk()">
+                                <img src="/img/kakao.png" alt="카카오톡" class="kakao-icon" >
+                            </a>
+                            <a href="#" class="spim_be link_facebook _spi_facebook" data-button="facebook" onclick="shareToFacebook()">
+                                <img src="/img/face.png" alt="페이스북" class="facebook-icon">
+
+                            </a>
+                            <!-- 추가 아이콘 버튼들 -->
+                        </div>
+                    </div>
+                </div>
+                <div class="spi_copyurl" style="margin-right: 20px;">
+                    <span id="currentUrl" class="_spi_input_copyurl _spi_copyurl_txt spi_copyurl_url"></span>
+                    <a href="#" class="_spi_copyurl spi_btn_copyurl" data-button="copyurl" onclick="copyUrl()" style=" text-decoration: none; /* 밑줄 제거 */">URL 복사</a>
+
+                </div>
+
+                <a href="#" class="_spi_cls spi_close" role="button" onclick="closeShareModal()"><span class="_spi_cls spim"></span></a>
+            </div>
+
+
+            <hr class="my-4">
+            <div class="text-right">
+                <div class="h4 text-danger text-left">
+                    <input type="hidden" th:value="${item.price}" id="price" name="price">
+                    <span th:text="${item.price}"></span>원
+                </div>
+                <div class="input-group w-50">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">수량</span>
+                    </div>
+                    <input type="number" name="count" id="count" class="form-control" value="1" min="1">
+                </div>
+            </div>
+            <hr class="my-4">
+
+            <div class="text-right mgt-50">
+                <h5>결제 금액</h5>
+                <h3 name="totalPrice" id="totalPrice"> </h3><!--class="font-weight-bold"-->
+            </div>
+            <div th:if="${item.itemSellStatus == T(com.shop.constant.ItemSellStatus).SELL}"
+                 class="text-right">
+                <button type="button" class="custom-file-upload"
+                        onclick="addCart()">
+                    장바구니 담기</button>
+                <button type="button" class="custom-file-upload" onclick="order()">주문하기</button>
+            </div>
+            <div th:unless="${item.itemSellStatus == T(com.shop.constant.ItemSellStatus).SELL}"
+                 class="text-right">
+                <button type="button" class="btn btn-danger btn-lg">품절</button>
+            </div>
+        </div>
+    </div>
+    <div class="mgt-30">
+        <div class="container">
+            <hr class="my-4">
+            <p class="lead" th:text="${item.itemDetail}"></p>
+        </div>
+    </div>
+    <div th:each="itemImg : ${item.itemImgDtoList}" class="text-center">
+    </div>
+    <!-- 알림 메시지 컨테이너 -->
+    <div id="notification" class="notification hidden">
+        <img src="/img/ch.png" alt="체크 이미지" class="notification-icon">
+        <div class="notification-content">
+            <p id="notification-message"></p>
+        </div>
+    </div>
+</div></body>

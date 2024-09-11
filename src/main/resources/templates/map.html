@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <title>지도 페이지</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link th:href="@{/css/layout1.css}" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"> <!-- 추가한 CSS 파일 -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e54ce03a713d68260d9d61099c49cd96&libraries=services,clusterer,drawing"></script>
+    <style>
+        .map_wrap, .map_wrap * {margin:0; padding:0;font-family:'Malgun Gothic',dotum,'돋움',sans-serif;font-size:12px;}
+               .map_wrap {position:relative;width:100%;height:350px;}
+               #category {position:absolute;top:10px;left:10px;border-radius: 5px; border:1px solid #909090;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);background: #fff;overflow: hidden;z-index: 2;}
+               #category li {float:left;list-style: none;width:100px; border-right:1px solid #acacac;padding:6px 0;text-align: center; cursor: pointer;}
+               #category li.on {background: #eee;}
+               #category li:hover {background: #ffe6e6;border-left:1px solid #acacac;margin-left: -1px;}
+               #category li:last-child{margin-right:0;border-right:0;}
+               #category li span {display: block;margin:0 auto 3px;width:27px;height: 28px;}
+               #category li .category_bg {background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_category.png) no-repeat;}
+               #category li .hospital {background-position: -10px 0;} /* 애견병원 */
+               #category li .cafe {background-position: -10px -36px;} /* 애견카페 */
+               #category li .kindergarten {background-position: -10px -72px;} /* 애견유치원 */
+               #category li .grooming {background-position: -10px -108px;} /* 애견미용실 */
+               #category li.on .category_bg {background-position-x:-46px;}
+               .placeinfo_wrap {position:absolute;bottom:28px;left:-150px;width:300px;}
+               .placeinfo {position:relative;width:100%;border-radius:6px;border: 1px solid #ccc;border-bottom:2px solid #ddd;padding-bottom: 10px;background: #fff;}
+               .placeinfo:nth-of-type(n) {border:0; box-shadow:0px 1px 2px #888;}
+               .placeinfo_wrap .after {content:'';position:relative;margin-left:-12px;left:50%;width:22px;height:12px;background:url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}
+               .placeinfo a, .placeinfo a:hover, .placeinfo a:active{color:#fff;text-decoration: none;}
+               .placeinfo a, .placeinfo span {display: block;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+               .placeinfo span {margin:5px 5px 0 5px;cursor: default;font-size:13px;}
+               .placeinfo .title {font-weight: bold; font-size:14px;border-radius: 6px 6px 0 0;margin: -1px -1px 0 -1px;padding:10px; color: #fff;background: #d95050;background: #d95050 url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/arrow_white.png) no-repeat right 14px center;}
+               .placeinfo .tel {color:#0f7833;}
+               .placeinfo .jibun {color:#999;font-size:11px;margin-top:0;}
+
+
+
+               /* 전체 페이지 스타일 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color:white;
+            overflow: hidden; /* 스크롤을 비활성화합니다 */
+        }
+
+
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        /* 지도 컨테이너 스타일 */
+        #map-container {
+            width: 100%;
+            height: 50vh; /* 화면 높이의 50% */
+            overflow: hidden; /* 스크롤을 숨김 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-top: 50%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px; /* 모서리 둥글게 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+            animation: slideUp 0.6s ease-out; /* 애니메이션 추가 */
+             margin-top: 50%;
+        }
+
+        /* 메인 컨텐츠 스타일 */
+        .container {
+            padding: 20px;
+        }
+
+        .sub-tit-wrap {
+            margin-bottom: 20px;
+        }
+
+
+        /* 애니메이션 정의 */
+        @keyframes fadeIn {
+            from {.
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+       /* 기본 인포윈도우 스타일을 덮어씁니다. */
+       .infowindow-content {
+           padding: 10px !important;
+           background-color: #fff !important;
+           border: none !important;
+           border-radius: 8px !important;
+           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+           font-family: Arial, sans-serif !important;
+           width: 210px !important;
+       }
+
+       .infowindow-content p {
+          margin: 0 !important; /* 기본 여백 제거 및 사용자 정의 여백 적용 */
+           font-size: 18px !important; /* 기본 글꼴 크기 제거 및 사용자 정의 글꼴 크기 적용 */
+           text-align: center !important; /* 기본 텍스트 정렬 제거 및 사용자 정의 텍스트 정렬 적용 */
+           color: #333 !important; /* 기본 글꼴 색상 제거 및 사용자 정의 글꼴 색상 적용 */
+       }
+
+       .infowindow-content a {
+          display: block !important; /* 기본 링크 표시 제거 및 사용자 정의 링크 표시 적용 */
+           margin-top: 5px !important; /* 기본 여백 제거 및 사용자 정의 여백 적용 */
+           color: #4CAF50 !important; /* 기본 링크 색상 제거 및 사용자 정의 링크 색상 적용 */
+           text-decoration: none !important; /* 기본 링크 밑줄 제거 및 사용자 정의 링크 밑줄 적용 */
+           font-size: 14px !important; /* 기본 링크 글꼴 크기 제거 및 사용자 정의 링크 글꼴 크기 적용 */
+           text-align: center !important; /* 기본 링크 텍스트 정렬 제거 및 사용자 정의 링크 텍스트 정렬 적용 */
+       }
+       }
+
+       .infowindow-content a:hover {
+           text-decoration: underline;
+       }
+
+
+               .contact-info {
+               margin-top: 20px;
+           display: flex;
+           justify-content: center; /* 중앙 정렬 */
+           gap: 50px; /* 아이템 간 간격 */
+       }
+
+       .contact-item {
+           display: flex;
+           flex-direction: column; /* 아이콘 위에 텍스트가 오도록 설정 */
+           align-items: center; /* 중앙 정렬 */
+           font-size: 14px;
+            margin-top: 20px;
+       }
+
+       .contact-item i {
+           font-size: 20px;
+           margin-bottom: 5px; /* 아이콘과 텍스트 간의 간격 */
+       }
+
+       .contact-item span {
+           display: block;
+       }
+
+
+       /* 버튼 스타일 */
+       .map-type-buttons {
+           text-align: center;
+           margin: 20px 0;
+       }
+
+       .map-type-buttons button {
+           background-color: white; /* 버튼 배경 색상 */
+           color: black; /* 버튼 텍스트 색상 */
+           border: none; /* 버튼 테두리 제거 */
+           border-radius: 5px; /* 모서리 둥글게 */
+           padding: 10px 20px; /* 버튼 안쪽 여백 */
+           margin: 5px; /* 버튼 간 간격 */
+           font-size: 16px; /* 버튼 글꼴 크기 */
+           cursor: pointer; /* 마우스 커서 변경 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 버튼 호버시 그림자 추가 */
+           transition: background-color 0.3s, box-shadow 0.3s; /* 배경색 및 그림자 변화에 애니메이션 추가 */
+       }
+
+       .map-type-buttons button:hover {
+       color: #a5d6a7;
+           background-color: white; /* 버튼 호버시 배경 색상 */
+           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 버튼 호버시 그림자 추가 */
+       }
+
+        /* 배경 이미지 스타일 */
+           .background-image {
+               background-image: url('/img/1234.png'); /* 배경 이미지 경로 */
+               background-repeat: repeat-x; /* 가로로 반복 */
+             background-size: 25% auto; /* 이미지 크기를 전체 가로의 25%로 설정 */
+               background-position: bottom; /* 이미지 위치 */
+               height: 100px; /* 이미지 높이 설정, 필요에 따라 조절 */
+               position: relative; /* 상대 위치 설정 */
+               width: 100%; /* 전체 너비 */
+                position: fixed; /* 화면 하단에 고정 */
+               bottom: 0; /* 하단에 위치 */
+               left: 0; /* 왼쪽에 위치 */
+        z-index: 1; /* 나무 및 나뭇잎 이미지 위에 배치 */
+                opacity: 0.9; /* 투명도 설정 (0.0: 완전히 투명, 1.0: 불투명) */
+           }
+       /* 나무 이미지 */
+       .tree-image {
+           background-image: url('/img/tree.png'); /* 나무 이미지 경로 */
+           background-repeat: no-repeat; /* 반복하지 않음 */
+           background-size: contain; /* 이미지 크기 조정 */
+           background-position: left bottom; /* 왼쪽 하단에 위치 */
+           height: 50%; /* 나무 이미지 높이 설정, 필요에 따라 조절 */
+           width: 500px; /* 나무 이미지 너비 설정, 필요에 따라 조절 */
+           position: absolute; /* 절대 위치 */
+           bottom: -50px; /* 하단에 위치 */
+           left: -50px; /* 왼쪽에 위치 */
+           z-index: 1; /* 배경 이미지보다 위에 배치 */
+       }
+       /* 무지개 이미지 스타일 */
+       .rainbow-image {
+           position: absolute; /* 절대 위치 설정 */
+           top:120px; /* 상단에 위치 */
+           left: 10px;; /* 왼쪽에 위치 */
+           width: 100%; /* 너비를 100%로 설정하여 지도와 동일하게 맞춤 */
+           height: 64%; /* 높이를 100%로 설정하여 지도와 동일하게 맞춤 */
+           background-image: url('/img/ra.png'); /* 무지개 이미지 경로 */
+          background-size:80% auto; /* 무지개 이미지 크기를 줄임 */
+           background-position: center; /* 이미지 위치 중앙 */
+           background-repeat: no-repeat; /* 이미지 반복 안 함 */
+           opacity: 0.1; /* 투명도 설정 (0: 완전히 투명, 1: 불투명) */
+           z-index: 0; /* 지도 위에 배치 */
+       }
+
+    </style>
+
+</head>
+<body>
+<div th:replace="~{fragments/header::header}" class="header"></div>
+<!--<h2>오시는 길</h2>
+<div class="underline"></div>
+<p>Poedog에 오시는 길을 안내해드립니다.</p>-->
+<div class="container" >
+    <section class="sub-tit-wrap aos-init aos-animate" data-aos="fade-up">
+    </section>
+</div>
+<div class="rainbow-image"></div>
+<div id="map-container" style=   "margin-top: 100px;">
+
+    <div id="map" style="width:50%; height:50vh; margin-top: 100px;"></div>
+</div>
+<!-- 버튼 추가 부분 -->
+<div class="map-type-buttons">
+    <button onclick="setOverlayMapTypeId('traffic')">교통정보 보기</button>
+    <button onclick="setOverlayMapTypeId('roadview')">로드뷰 도로정보 보기</button>
+    <button onclick="setOverlayMapTypeId('terrain')">지형정보 보기</button>
+    <button onclick="setOverlayMapTypeId('use_district')">지적편집도 보기</button>
+</div>
+
+<!-- 연락처 정보 부분 -->
+<div class="contact-info">
+    <div class="contact-item">
+        <i class="fas fa-phone-alt"></i>
+        <span>전화번호: 010-1234-5678</span>
+    </div>
+    <div class="contact-item">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>주소: 인천광역시 부평구 </span>
+    </div>
+</div>
+<!-- 배경 이미지 -->
+<div class="background-image"></div>
+
+<!-- 나무 이미지 -->
+<div class="tree-image"></div>
+
+<script>
+
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+       mapOption = {
+           center: new kakao.maps.LatLng(37.4910456, 126.7204602), // 지도의 중심좌표
+           level: 3 // 지도의 확대 레벨
+       };
+
+   var map = new kakao.maps.Map(mapContainer, mapOption);
+
+   // 마커가 표시될 위치입니다
+   var markerPosition = new kakao.maps.LatLng(37.4910456, 126.7204602);
+
+   // 마커 이미지 설정
+   var imageSrc = 'img/paw.png', // 마커 이미지의 주소입니다
+       imageSize = new kakao.maps.Size(50, 50), // 마커 이미지의 크기입니다 (이미지에 맞게 조절하세요)
+       imageOption = {offset: new kakao.maps.Point(25, 50)}; // 이미지 안에서의 좌표를 설정합니다
+
+   // 마커 이미지 생성
+   var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
+
+   // 마커를 생성합니다
+   var marker = new kakao.maps.Marker({
+       position: markerPosition,
+       image: markerImage // 마커 이미지 설정
+   });
+
+   // 마커가 지도 위에 표시되도록 설정합니다
+   marker.setMap(map);
+
+   var iwContent = `
+       <div class="infowindow-content">
+           <p>Poedog</p>
+           <a href="https://map.kakao.com/link/map/Poedog!,37.4910456, 126.7204602" target="_blank">큰 지도 보기</a>
+           <a href="https://map.kakao.com/link/to/GALL,37.4910456, 126.7204602" target="_blank">길찾기</a>
+       </div>
+   `;
+   var iwPosition = new kakao.maps.LatLng(37.4910456, 126.7204602); // 인포윈도우 표시 위치입니다
+
+   // 인포윈도우를 생성합니다
+   var infowindow = new kakao.maps.InfoWindow({
+       position: iwPosition,
+       content: iwContent
+   });
+
+   // 마커 위에 인포윈도우를 표시합니다.
+   infowindow.open(map, marker);
+
+   // 지도에 타입을 추가하고 제거하는 함수
+   var currentTypeId;
+
+   function setOverlayMapTypeId(maptype) {
+       var changeMaptype;
+
+       if (maptype === 'traffic') {
+           changeMaptype = kakao.maps.MapTypeId.TRAFFIC;
+       } else if (maptype === 'roadview') {
+           changeMaptype = kakao.maps.MapTypeId.ROADVIEW;
+       } else if (maptype === 'terrain') {
+           changeMaptype = kakao.maps.MapTypeId.TERRAIN;
+       } else if (maptype === 'use_district') {
+           changeMaptype = kakao.maps.MapTypeId.USE_DISTRICT;
+       }
+
+       if (currentTypeId) {
+           map.removeOverlayMapTypeId(currentTypeId);
+       }
+
+       map.addOverlayMapTypeId(changeMaptype);
+       currentTypeId = changeMaptype;
+
+        createMarker();
+   }
+
+</script>
+
+
+</body>
+</html>
