@@ -103,11 +103,6 @@ public class MemberController {
         }
         return new ResponseEntity<String>("인증 코드를 올바르게 입력해주세요.",HttpStatus.BAD_REQUEST);
     }
-    @GetMapping("/memberPhoneCheck")
-    public @ResponseBody String memberPhoneCheck(@RequestParam(value="to") String to) throws CoolsmsException {
-
-        return paymentServices.PhoneNumberCheck(to);
-    }
     @GetMapping(value = "/mypage/changePassword")
     public String changePasswordForm() {
         return "mypage";  // 비밀번호 변경 폼을 반환
@@ -144,7 +139,14 @@ public class MemberController {
         model.addAttribute("successMessage", "비밀번호가 성공적으로 변경되었습니다.");
         return "mypage";  // 성공적으로 변경되면 마이페이지로 이동
     }
-
+    @PostMapping("/members/find-id")
+    public ModelAndView findId(@RequestParam("name") String name,
+                               @RequestParam("address") String address) {
+        String foundId = memberService.findIdByNameAndAddress(name, address);
+        ModelAndView mav = new ModelAndView("findIdResult");
+        mav.addObject("foundId", foundId != null ? foundId : "아이디를 찾을 수 없습니다.");
+        return mav;
+    }
 
 
 }

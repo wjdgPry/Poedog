@@ -55,6 +55,8 @@ public class MemberService implements UserDetailsService {
     public Member updateMember(Member member){
         return memberRepository.save(member);
     }
-
+    public String findIdByNameAndAddress(String name, String address) {
+        return memberRepository.findIdByNameAndAddress(name, address);
+    }
 }
 

@@ -129,18 +129,7 @@
 </div>
 </div>
 <script>
-    function addToRecentViewed(productId) {
-        let recentViewed = JSON.parse(localStorage.getItem('recentViewed')) || [];
-        // 상품 ID가 이미 목록에 있는지 확인
-        if (!recentViewed.includes(productId)) {
-            recentViewed.push(productId);
-            // 최근 본 상품이 5개를 초과하면 오래된 항목 제거
-            if (recentViewed.length > 5) {
-                recentViewed.shift(); // 첫 번째 요소 제거
-            }
-            localStorage.setItem('recentViewed', JSON.stringify(recentViewed));
-        }
-    }
+
 </script>
 </body>
 </html>

@@ -1004,49 +1004,6 @@ var selectedCategory = ''; // 카테고리 선택을 위한 변수 추가
         }
     });
 
-    $(document).ready(function() {
-    loadRecentViewedProducts();
-
-    function loadRecentViewedProducts() {
-        let recentViewed = JSON.parse(localStorage.getItem('recentViewed')) || [];
-        console.log('Recent Viewed:', recentViewed);
-
-        // 최근 본 상품이 최대 5개만 보이도록 제한
-        recentViewed = recentViewed.slice(-5);
-
-        if (recentViewed.length > 0) {
-            recentViewed.forEach(productId => {
-                $.ajax({
-                    method: "GET",
-                    url: `/api/products/${productId}`, // API 엔드포인트
-                    success: function(product) {
-                        console.log('Product Data:', product); // 데이터 확인
-                        let productElement = $(`
-                            <div class="col-md-4 mb-3">
-                                <div class="card">
-                                    <a href="/item/${product.id}" class="text-dark">
-                                        <img src="${product.imgUrl}" class="card-img-top" alt="${product.itemNm}">
-                                        <div class="card-body d-flex flex-column">
-                                            <h4 class="card-title">${product.itemNm}</h4>
-                                            <h3 class="card-price text-danger mt-auto">${product.price} 원</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        `);
-
-                        $('#recent-products').append(productElement);
-                    },
-                    error: function(error) {
-                        console.log('API Error:', error); // API 호출 오류 확인
-                    }
-                });
-            });
-        } else {
-            $('#recent-products').append('<p>최근 본 상품이 없습니다.</p>');
-        }
-    }
-});
 
 </script>
 </body>
